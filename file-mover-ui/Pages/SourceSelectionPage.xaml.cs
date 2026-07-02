@@ -31,15 +31,7 @@ public partial class SourceSelectionPage : ContentPage
 		}
 
 		sessionService.SourceLocation = viewModel.SelectedLocation;
-
-		if (viewModel.SelectedProvider?.Type == "local")
-		{
-			await Shell.Current.GoToAsync("file-selection");
-		}
-		else
-		{
-			await Shell.Current.GoToAsync("destination-selection");
-		}
+		await Shell.Current.GoToAsync("file-selection");
 	}
 
 	private async void OnCancelClicked(object sender, EventArgs e)

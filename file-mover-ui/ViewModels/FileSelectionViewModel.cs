@@ -8,6 +8,7 @@ namespace FileMover.UI.ViewModels;
 public partial class FileSelectionViewModel : BaseViewModel
 {
     private readonly IFileMoverService fileMoverService;
+    private readonly TransferSessionService sessionService;
     private readonly Stack<string> pathStack = new();
     private readonly Dictionary<string, List<string>> savedSelectionPaths = new();
 
@@ -23,13 +24,17 @@ public partial class FileSelectionViewModel : BaseViewModel
     [ObservableProperty]
     private bool canGoBack;
 
+    public bool IsCloudProvider { get; private set; }
+    public string ActiveLocationId { get; private set; } = string.Empty;
+
     public ObservableCollection<FileItem> Files { get; } = new();
     public List<FileItem> AllFiles { get; private set; } = [];
     public ObservableCollection<FileItem> SelectedFiles { get; } = new();
 
-    public FileSelectionViewModel(IFileMoverService fileMoverService)
+    public FileSelectionViewModel(IFileMoverService fileMoverService, TransferSessionService sessionService)
     {
         this.fileMoverService = fileMoverService;
+        this.sessionService = sessionService;
         Title = "Select Files";
     }
 
@@ -40,9 +45,15 @@ public partial class FileSelectionViewModel : BaseViewModel
             IsBusy = true;
             BusyMessage = "Loading files...";
 
-            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            var source = sessionService.SourceLocation;
+            var dest = sessionService.DestinationLocation;
+            var matched = source?.Id == locationId ? source : dest?.Id == locationId ? dest : null;
+            var isLocal = matched?.ProviderId == "windows";
+
+            if (isLocal && !string.IsNullOrEmpty(path) && Directory.Exists(path))
             {
                 var items = await Task.Run(() => EnumerateFileSystem(path));
+                items = InjectSystemFolderEntries(items, path);
                 Files.Clear();
                 foreach (var item in items)
                     Files.Add(item);
@@ -57,6 +68,8 @@ public partial class FileSelectionViewModel : BaseViewModel
                     Files.Add(file);
             }
 
+            IsCloudProvider = !isLocal;
+            ActiveLocationId = locationId;
             CurrentPath = path;
         }
         finally
@@ -73,6 +86,7 @@ public partial class FileSelectionViewModel : BaseViewModel
             BusyMessage = "Loading...";
 
             var items = await Task.Run(() => EnumerateFileSystem(path));
+            items = InjectSystemFolderEntries(items, path);
 
             SelectedFiles.Clear();
             if (savedSelectionPaths.TryGetValue(path, out var savedPaths))
@@ -131,6 +145,54 @@ public partial class FileSelectionViewModel : BaseViewModel
         return items;
     }
 
+    private static bool IsDesktopPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return false;
+        var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        return string.Equals(
+            Path.GetFullPath(path),
+            Path.GetFullPath(desktopPath),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static readonly (string Name, Func<string> GetPath)[] SystemFolderEntries =
+    [
+        ("Downloads", () => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
+        ("Documents", () => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
+        ("Pictures", () => Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)),
+        ("Videos", () => Environment.GetFolderPath(Environment.SpecialFolder.MyVideos)),
+        ("Music", () => Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)),
+    ];
+
+    private static List<FileItem> InjectSystemFolderEntries(List<FileItem> rawItems, string path)
+    {
+        if (!IsDesktopPath(path))
+            return rawItems;
+
+        var result = new List<FileItem>(rawItems.Count + SystemFolderEntries.Length);
+
+        foreach (var entry in SystemFolderEntries)
+        {
+            var folderPath = entry.GetPath();
+            if (Directory.Exists(folderPath))
+            {
+                result.Add(new FileItem
+                {
+                    Id = folderPath,
+                    Name = entry.Name,
+                    Path = folderPath,
+                    IsFolder = true,
+                    Size = 0,
+                    Modified = Directory.GetLastWriteTime(folderPath)
+                });
+            }
+        }
+
+        result.AddRange(rawItems);
+        return result;
+    }
+
     private static string GetMimeType(string extension)
     {
         return extension.ToLowerInvariant() switch
@@ -165,7 +227,15 @@ public partial class FileSelectionViewModel : BaseViewModel
         pathStack.Push(CurrentPath ?? "");
         CurrentPath = folder.Path;
         CanGoBack = true;
-        await LoadFromFileSystemAsync(folder.Path);
+
+        if (IsCloudProvider)
+        {
+            await LoadFilesAsync(ActiveLocationId, folder.Path);
+        }
+        else
+        {
+            await LoadFromFileSystemAsync(folder.Path);
+        }
     }
 
     public async Task NavigateBackAsync()
@@ -181,7 +251,16 @@ public partial class FileSelectionViewModel : BaseViewModel
         CanGoBack = pathStack.Count > 0;
 
         if (!string.IsNullOrEmpty(parentPath))
-            await LoadFromFileSystemAsync(parentPath);
+        {
+            if (IsCloudProvider)
+            {
+                await LoadFilesAsync(ActiveLocationId, parentPath);
+            }
+            else
+            {
+                await LoadFromFileSystemAsync(parentPath);
+            }
+        }
     }
 
     partial void OnSelectedFileChanged(FileItem? value)

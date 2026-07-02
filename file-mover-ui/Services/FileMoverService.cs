@@ -6,13 +6,16 @@ public class FileMoverService : IFileMoverService
 {
     private readonly IEnumerable<IStorageProviderService> _providers;
     private readonly ProviderConfigLoader _configLoader;
+    private readonly TransferSessionService _sessionService;
 
     public FileMoverService(
         IEnumerable<IStorageProviderService> providers,
-        ProviderConfigLoader configLoader)
+        ProviderConfigLoader configLoader,
+        TransferSessionService sessionService)
     {
         _providers = providers;
         _configLoader = configLoader;
+        _sessionService = sessionService;
     }
 
     public async Task<List<StorageProvider>> GetStorageProvidersAsync()
@@ -35,7 +38,14 @@ public class FileMoverService : IFileMoverService
 
     public async Task<List<StorageLocation>> GetLocationsAsync(string providerId)
     {
-        var provider = GetProvider(providerId);
+        var providerType = providerId switch
+        {
+            "google-drive" => "gcs",
+            "windows" => "local",
+            "prime" => "prime",
+            _ => providerId
+        };
+        var provider = GetProvider(providerType);
         if (provider is WindowsStorageProvider)
         {
             return
@@ -169,10 +179,25 @@ public class FileMoverService : IFileMoverService
 
     private IStorageProviderService GetProviderForLocation(string locationId)
     {
-        return locationId switch
+        if (locationId is "local-downloads" or "local-documents" or "local-pictures"
+                or "local-videos" or "local-music" or "local-desktop")
+            return GetProvider("local");
+
+        var sourceLocation = _sessionService.SourceLocation;
+        var destLocation = _sessionService.DestinationLocation;
+
+        var matchedLocation = sourceLocation?.Id == locationId ? sourceLocation
+            : destLocation?.Id == locationId ? destLocation
+            : null;
+
+        if (matchedLocation is null)
+            return GetProvider("local");
+
+        return matchedLocation.ProviderId switch
         {
-            "local-downloads" or "local-documents" or "local-pictures"
-                or "local-videos" or "local-music" or "local-desktop" => GetProvider("local"),
+            "google-drive" => GetProvider("gcs"),
+            "prime" => GetProvider("prime"),
+            "windows" => GetProvider("local"),
             _ => GetProvider("local")
         };
     }
