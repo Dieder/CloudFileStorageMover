@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
+             x:Class="FileMover.UI.Pages.QrDisplayPage"
+             Title="Server QR Code">
+
+    <VerticalStackLayout Spacing="20" Padding="20" VerticalOptions="Center">
+
+        <Label Text="Scan this QR code with the client app"
+               FontSize="18"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center" />
+
+        <Frame BorderColor="#E0E0E0"
+               CornerRadius="12"
+               Padding="20"
+               HasShadow="True"
+               HorizontalOptions="Center"
+               WidthRequest="280"
+               HeightRequest="280">
+            <zxing:BarcodeGeneratorView
+                x:Name="QrCodeView"
+                Format="QrCode"
+                Value="{Binding QrCodeData}"
+                WidthRequest="240"
+                HeightRequest="240"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Frame>
+
+        <Label Text="{Binding QrCodeData, StringFormat='Connection: {0}'}"
+               FontSize="11"
+               TextColor="Gray"
+               HorizontalTextAlignment="Center"
+               LineBreakMode="CharacterWrap"
+               MaximumWidthRequest="300" />
+
+        <Label Text="Share this code with the person you're sending files to"
+               FontSize="12"
+               TextColor="Gray"
+               HorizontalTextAlignment="Center" />
+
+        <Button Text="Done"
+                Clicked="OnDoneClicked"
+                BackgroundColor="#512BD4"
+                TextColor="White"
+                Margin="0,10,0,0" />
+
+    </VerticalStackLayout>
+
+</ContentPage>

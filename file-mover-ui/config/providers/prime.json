@@ -1,0 +1,7 @@
+{
+  "providerId": "prime",
+  "providerName": "Amazon Prime Storage",
+  "apiBaseUrl": "https://api.prime-storage.example.com/v1",
+  "apiKey": "",
+  "apiSecret": ""
+}

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FileMover.UI.Pages.HomePage"
+             Title="File Mover">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="⚙"
+                     Clicked="OnSettingsClicked"
+                     Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="15"
+            VerticalOptions="Center">
+
+            <!-- Header -->
+            <Label
+                Text="File Mover"
+                FontSize="32"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center" />
+
+            <Label
+                Text="Move files between cloud storage and devices"
+                FontSize="16"
+                TextColor="Gray"
+                HorizontalTextAlignment="Center" />
+
+            <!-- New Transfer Button -->
+            <Button
+                x:Name="NewTransferBtn"
+                Text="Start New Transfer"
+                FontSize="18"
+                Padding="20,15"
+                CornerRadius="8"
+                Clicked="OnNewTransferClicked"
+                BackgroundColor="#512BD4"
+                TextColor="White" />
+
+            <!-- Transfer History Section -->
+            <Frame
+                BorderColor="#E0E0E0"
+                CornerRadius="8"
+                HasShadow="True"
+                Padding="15">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="Recent Transfers"
+                        FontSize="18"
+                        FontAttributes="Bold" />
+
+                    <CollectionView x:Name="RecentTransfersCollection"
+                                    SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Padding="10" Spacing="5">
+                                    <Label Text="{Binding CurrentFile}"
+                                           FontAttributes="Bold" />
+                                    <ProgressBar Progress="{Binding ProgressPercentage, 
+                                                 Converter={StaticResource DoubleToProgressConverter}}"
+                                                 HeightRequest="4" />
+                                    <Label Text="{Binding Status}"
+                                           FontSize="12"
+                                           TextColor="Gray" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button
+                        Text="View All History"
+                        FontSize="14"
+                        Clicked="OnViewHistoryClicked" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

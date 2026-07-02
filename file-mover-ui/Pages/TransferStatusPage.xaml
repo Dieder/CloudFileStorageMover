@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FileMover.UI.Pages.TransferStatusPage"
+             Title="Transfer Status">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Tab Header -->
+        <StackLayout Grid.Row="0"
+                    Orientation="Horizontal"
+                    Spacing="0"
+                    BackgroundColor="#F5F5F5">
+            <Button Text="Active"
+                    x:Name="ActiveTabBtn"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    FontSize="14"
+                    Padding="20,10"
+                    Clicked="OnActiveTabClicked"
+                    CornerRadius="0" />
+            <Button Text="History"
+                    x:Name="HistoryTabBtn"
+                    BackgroundColor="Transparent"
+                    TextColor="#512BD4"
+                    FontSize="14"
+                    Padding="20,10"
+                    Clicked="OnHistoryTabClicked"
+                    CornerRadius="0" />
+        </StackLayout>
+
+        <!-- Active Transfer Tab Content -->
+        <VerticalStackLayout Grid.Row="1"
+                           x:Name="ActiveTabContent"
+                           Spacing="15"
+                           Padding="15"
+                           IsVisible="True">
+
+            <Label
+                Text="Current Transfer"
+                FontSize="18"
+                FontAttributes="Bold" />
+
+            <Frame BorderColor="#E0E0E0"
+                   CornerRadius="8"
+                   Padding="15"
+                   HasShadow="True"
+                   IsVisible="{Binding CurrentTransfer, Converter={StaticResource NotNullToBoolConverter}}">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding CurrentTransfer.CurrentFile}"
+                           FontSize="14"
+                           FontAttributes="Bold" />
+
+                    <Label Text="{Binding CurrentTransfer.Status, StringFormat='Status: {0}'}"
+                           FontSize="12"
+                           TextColor="Gray" />
+
+                    <ProgressBar Progress="{Binding CurrentTransfer.ProgressPercentage, 
+                                         Converter={StaticResource DoubleToProgressConverter}}"
+                                 HeightRequest="8"
+                                 Margin="0,10" />
+
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <Label Text="{Binding CurrentTransfer.ProgressPercentage, StringFormat='{0:F1}%'}"
+                               FontSize="12"
+                               FontAttributes="Bold" />
+                        <Label Text="{Binding CurrentTransfer.CompletedItems, StringFormat='({0} of '}"
+                               FontSize="12"
+                               TextColor="Gray" />
+                        <Label Text="{Binding CurrentTransfer.TotalItems, StringFormat='{0} files)'}"
+                               FontSize="12"
+                               TextColor="Gray" />
+                    </StackLayout>
+
+                    <Frame BorderColor="#F5F5F5" CornerRadius="6" Padding="10" Margin="0,10">
+                        <VerticalStackLayout Spacing="5">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Elapsed:" FontSize="11" FontAttributes="Bold" />
+                                <Label Text="{Binding CurrentTransfer.ElapsedTime, StringFormat='{0:hh\\:mm\\:ss}'}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Est. Remaining:" FontSize="11" FontAttributes="Bold" />
+                                <Label Text="{Binding CurrentTransfer.EstimatedTimeRemaining, StringFormat='{0:hh\\:mm\\:ss}'}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                            </StackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Label Text="{Binding CurrentTransfer.ErrorMessage}"
+                           FontSize="11"
+                           TextColor="Red"
+                           IsVisible="{Binding CurrentTransfer.ErrorMessage, Converter={StaticResource NotNullToBoolConverter}}"
+                           Margin="0,10,0,0" />
+
+                    <StackLayout Spacing="10" Margin="0,10">
+                        <Button Text="Cancel Transfer"
+                                Clicked="OnCancelClicked"
+                                BackgroundColor="#D32F2F"
+                                TextColor="White" />
+                    </StackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="No active transfer"
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,20"
+                   IsVisible="{Binding CurrentTransfer, Converter={StaticResource NullToBoolConverter}}" />
+
+        </VerticalStackLayout>
+
+        <!-- History Tab Content -->
+        <VerticalStackLayout Grid.Row="1"
+                           x:Name="HistoryTabContent"
+                           Spacing="10"
+                           Padding="15"
+                           IsVisible="False">
+
+            <Label Text="Transfer History"
+                   FontSize="18"
+                   FontAttributes="Bold" />
+
+            <CollectionView ItemsSource="{Binding TransferHistory}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="#E0E0E0"
+                               CornerRadius="8"
+                               Padding="15"
+                               Margin="0,5"
+                               HasShadow="True">
+                            <VerticalStackLayout Spacing="5">
+                                <StackLayout Orientation="Horizontal">
+                                    <Label Text="{Binding SessionId, StringFormat='ID: {0}'}"
+                                           FontSize="12"
+                                           TextColor="Gray"
+                                           HorizontalOptions="FillAndExpand" />
+                                    <Label Text="{Binding Status}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
+                                </StackLayout>
+
+                                <Label Text="{Binding CompletedItems, StringFormat='Completed: {0}'}"
+                                       FontSize="11" />
+
+                                <ProgressBar Progress="{Binding ProgressPercentage,
+                                             Converter={StaticResource DoubleToProgressConverter}}"
+                                             HeightRequest="4" />
+
+                                <Label Text="{Binding ElapsedTime, StringFormat='Duration: {0:hh\\:mm\\:ss}'}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

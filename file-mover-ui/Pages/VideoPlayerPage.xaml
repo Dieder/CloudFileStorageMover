@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FileMover.UI.Pages.VideoPlayerPage"
+             Title="Video Player">
+
+    <VerticalStackLayout Spacing="20" Padding="20" VerticalOptions="Center">
+
+        <Frame BorderColor="#E0E0E0"
+               CornerRadius="12"
+               Padding="30"
+               HasShadow="True"
+               HorizontalOptions="Center"
+               MinimumWidthRequest="300"
+               MinimumHeightRequest="200"
+               BackgroundColor="#1A1A1A">
+            <Label Text="🎬"
+                   FontSize="64"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center" />
+        </Frame>
+
+        <Label x:Name="VideoTitle"
+               Text="Video Player"
+               FontSize="20"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center" />
+
+        <Label x:Name="VideoInfo"
+               Text="Loading..."
+               FontSize="14"
+               TextColor="Gray"
+               HorizontalTextAlignment="Center" />
+
+        <Label Text="Video playback requires the CommunityToolkit.Maui.MediaElement package. The file will be included in the transfer."
+               FontSize="12"
+               TextColor="Gray"
+               HorizontalTextAlignment="Center"
+               Margin="0,10" />
+
+        <Button Text="Close"
+                Clicked="OnCloseClicked"
+                BackgroundColor="#512BD4"
+                TextColor="White"
+                Margin="0,10,0,0" />
+
+    </VerticalStackLayout>
+
+</ContentPage>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FileMover.UI.Pages.ImageEditorPage"
+             Title="Image Editor">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- Image Display Area -->
+        <Grid Grid.Row="0" Padding="10">
+            <Image x:Name="EditorImage"
+                   Aspect="AspectFit"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center" />
+
+            <Label x:Name="NoImageLabel"
+                   Text="No image selected"
+                   FontSize="16"
+                   TextColor="Gray"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   IsVisible="False" />
+        </Grid>
+
+        <!-- Toolbar -->
+        <VerticalStackLayout Grid.Row="1"
+                           Spacing="10"
+                           Padding="20"
+                           BackgroundColor="#F5F5F5">
+
+            <!-- Rotation Controls -->
+            <Label Text="Rotation" FontSize="14" FontAttributes="Bold" />
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+                <Button Text="↻ 90°"
+                        FontSize="14"
+                        Padding="15,8"
+                        Clicked="OnRotateRightClicked" />
+                <Button Text="↺ 90°"
+                        FontSize="14"
+                        Padding="15,8"
+                        Clicked="OnRotateLeftClicked" />
+                <Button Text="↕ Flip"
+                        FontSize="14"
+                        Padding="15,8"
+                        Clicked="OnFlipClicked" />
+            </StackLayout>
+
+            <!-- Crop Controls -->
+            <Label Text="Crop" FontSize="14" FontAttributes="Bold" Margin="0,5,0,0" />
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+                <Button Text="Original"
+                        FontSize="12"
+                        Padding="10,5"
+                        Clicked="OnCropOriginalClicked" />
+                <Button Text="Square (1:1)"
+                        FontSize="12"
+                        Padding="10,5"
+                        Clicked="OnCropSquareClicked" />
+                <Button Text="4:3"
+                        FontSize="12"
+                        Padding="10,5"
+                        Clicked="OnCrop4x3Clicked" />
+                <Button Text="16:9"
+                        FontSize="12"
+                        Padding="10,5"
+                        Clicked="OnCrop16x9Clicked" />
+            </StackLayout>
+
+            <!-- Action Buttons -->
+            <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                <Button Text="Save Copy"
+                        x:Name="SaveBtn"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        HorizontalOptions="FillAndExpand"
+                        Clicked="OnSaveClicked" />
+                <Button Text="Cancel"
+                        BackgroundColor="Transparent"
+                        TextColor="#512BD4"
+                        BorderColor="#512BD4"
+                        BorderWidth="1"
+                        HorizontalOptions="FillAndExpand"
+                        Clicked="OnCancelClicked" />
+            </StackLayout>
+
+            <!-- Version Label -->
+            <Label x:Name="VersionLabel"
+                   FontSize="11"
+                   TextColor="Gray"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="False" />
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FileMover.UI.Pages.SourceSelectionPage"
+             Title="Select Source">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="⚙"
+                     Clicked="OnSettingsClicked"
+                     Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="10" Padding="15">
+
+            <!-- Storage Providers Section -->
+            <Label
+                Text="Storage Providers"
+                FontSize="18"
+                FontAttributes="Bold" />
+
+            <CollectionView ItemsSource="{Binding StorageProviders}"
+                           SelectionMode="Single"
+                           SelectedItem="{Binding SelectedProvider}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="#E0E0E0"
+                               CornerRadius="8"
+                               Padding="15"
+                               Margin="0,5"
+                               HasShadow="True">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label Text="{Binding Type, StringFormat='Type: {0}'}"
+                                           FontSize="12"
+                                           TextColor="Gray" />
+                                    <Label Text="✓ Configured"
+                                           FontSize="12"
+                                           TextColor="Green"
+                                           IsVisible="{Binding IsConfigured}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1"
+                                        Text="Configure"
+                                        FontSize="11"
+                                        Padding="8,4"
+                                        VerticalOptions="Center"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ConfigureProviderCommand}"
+                                        IsVisible="{Binding IsConfigured, Converter={StaticResource InverseBoolConverter}}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Locations Section -->
+            <Label
+                Text="Locations"
+                FontSize="18"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <CollectionView ItemsSource="{Binding Locations}"
+                           SelectionMode="Single"
+                           SelectedItem="{Binding SelectedLocation}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="#D0D0D0"
+                               CornerRadius="8"
+                               Padding="15"
+                               Margin="0,5">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding DisplayName}"
+                                       FontSize="14"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding Path}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                                <Label Text="{Binding LastModified, StringFormat='Modified: {0:g}'}"
+                                       FontSize="11"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Action Buttons -->
+            <StackLayout Spacing="10" Margin="0,15">
+                <Button
+                    Text="Next"
+                    Clicked="OnNextClicked"
+                    BackgroundColor="#512BD4"
+                    TextColor="White" />
+
+                <Button
+                    Text="Cancel"
+                    Clicked="OnCancelClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="#512BD4"
+                    BorderColor="#512BD4"
+                    BorderWidth="1" />
+            </StackLayout>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                              IsVisible="{Binding IsBusy}"
+                              Color="#512BD4"
+                              Margin="0,10" />
+
+            <Label Text="{Binding BusyMessage}"
+                   FontSize="12"
+                   TextColor="Gray"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
