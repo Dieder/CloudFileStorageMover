@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "maui-app-lifecycle": {
+      "source": "dotnet/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dotnet-maui/skills/maui-app-lifecycle/SKILL.md",
+      "computedHash": "dc7bd92ede8a9612882d0c4b345154b885ccd14e86ee4efb69cb1ea67c5114c6"
+    },
+    "maui-dependency-injection": {
+      "source": "davidortinau/maui-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/maui-skills/skills/maui-dependency-injection/SKILL.md",
+      "computedHash": "f12679aaf2e398ebd38f426d8d6edcb086b7e8fd3cad56768114bb5ff7638639"
+    },
+    "mobile-android-design": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-design/skills/mobile-android-design/SKILL.md",
+      "computedHash": "143a60d6a0744a5058adf984e3a64b75cd2ef3714a15557f4ff6fd95e39ff23a"
+    }
+  }
+}

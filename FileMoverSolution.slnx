@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/file-mover-ui/">
+    <Project Path="file-mover-ui/FileMover.UI.csproj" />
+  </Folder>
+</Solution>
