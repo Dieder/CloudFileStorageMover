@@ -1,4 +1,5 @@
-/obj/**
-/bin/**
-/debug/**
+**/obj/**
+**/bin/**
+**/debug/**
 /binaries/**
+file-mover-ui/bin/Debug/System.Reflection.Emit.dll
