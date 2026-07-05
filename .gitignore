@@ -3,3 +3,5 @@
 **/debug/**
 /binaries/**
 file-mover-ui/bin/Debug/System.Reflection.Emit.dll
+/.vs/CopilotSnapshots
+/src/.vs/CloudStorageMover.slnx/copilot-chat/1c9fbcfb/sessions
