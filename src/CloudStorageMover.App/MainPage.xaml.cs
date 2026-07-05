@@ -1,23 +1,43 @@
-﻿namespace CloudStorageMover.App;
+﻿using CloudStorageMover.App.Pages;
+using CloudStorageMover.App.ViewModels;
+using CloudStorageMover.Controls.Controls;
+
+namespace CloudStorageMover.App;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+    private readonly MainPageViewModel _viewModel;
+    private readonly SourceSelectionPage _sourcePage;
+    private readonly ConfigurationPage _configPage;
 
-	public MainPage()
-	{
-		InitializeComponent();
-	}
+    public MainPage(MainPageViewModel viewModel,
+                    SourceSelectionPage sourcePage,
+                    ConfigurationPage configPage)
+    {
+        InitializeComponent();
+        _viewModel = viewModel;
+        _sourcePage = sourcePage;
+        _configPage = configPage;
+        BindingContext = viewModel;
 
-	private void OnCounterClicked(object? sender, EventArgs e)
-	{
-		count++;
+        MenuBar.ItemSelected += OnMenuItemSelected;
+        MenuBar.QuitRequested += OnQuitRequested;
 
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
+        ContentArea.Content = _sourcePage;
+    }
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
-	}
+    private void OnMenuItemSelected(object? sender, AppMenuItem e)
+    {
+        ContentArea.Content = e switch
+        {
+            AppMenuItem.Source => _sourcePage,
+            AppMenuItem.Configuration => _configPage,
+            _ => _sourcePage
+        };
+    }
+
+    private void OnQuitRequested(object? sender, EventArgs e)
+    {
+        Application.Current?.Quit();
+    }
 }
