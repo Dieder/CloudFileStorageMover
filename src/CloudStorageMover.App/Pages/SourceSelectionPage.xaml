@@ -3,12 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
              x:Class="CloudStorageMover.App.Pages.SourceSelectionPage"
-             x:DataType="vm:SourceSelectionViewModel">
-    <Grid Padding="20"
-          BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
-        <Label Text="Source Selection"
+             x:DataType="vm:SourceSelectionViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <Grid Padding="30"
+          RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="20">
+
+        <Label Grid.Row="0"
+               Text="Select Source"
                Style="{StaticResource Headline}"
-               VerticalOptions="Center"
-               HorizontalOptions="Center" />
+               FontSize="28" />
+
+        <Label Grid.Row="1"
+               Text="Choose where your files are located:"
+               Style="{StaticResource SubHeadline}"
+               TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+               FontSize="16" />
+
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Providers}"
+                        SelectionMode="None"
+                        VerticalOptions="Start">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ProviderItem">
+                    <Border StrokeShape="RoundRectangle CornerRadius=10"
+                            Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
+                            StrokeThickness="1"
+                            Padding="20"
+                            BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#2a2a2a}"
+                            HeightRequest="70">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SourceSelectionViewModel}}, Path=SelectProviderCommand}"
+                                                  CommandParameter="{Binding ProviderType}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="16">
+                            <Border Grid.Column="0"
+                                    WidthRequest="44"
+                                    HeightRequest="44"
+                                    StrokeShape="RoundRectangle CornerRadius=22"
+                                    StrokeThickness="0"
+                                    BackgroundColor="#512BD4"
+                                    VerticalOptions="Center">
+                                <Label Text="{Binding DisplayName[0]}"
+                                       FontSize="20"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1"
+                                                 VerticalOptions="Center"
+                                                 Spacing="4">
+                                <Label Text="{Binding DisplayName}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#1f1f1f, Dark=#e0e0e0}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </Grid>
 </ContentView>

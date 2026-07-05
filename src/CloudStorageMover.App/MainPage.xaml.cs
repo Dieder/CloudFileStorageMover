@@ -1,6 +1,8 @@
-﻿using CloudStorageMover.App.Pages;
+﻿using System.Collections.ObjectModel;
+using CloudStorageMover.App.Pages;
 using CloudStorageMover.App.ViewModels;
 using CloudStorageMover.Controls.Controls;
+using CloudStorageMover.Core.Models;
 
 namespace CloudStorageMover.App;
 
@@ -22,12 +24,15 @@ public partial class MainPage : ContentPage
 
         MenuBar.ItemSelected += OnMenuItemSelected;
         MenuBar.QuitRequested += OnQuitRequested;
+        _sourcePage.FoldersLoaded += OnSourceFoldersLoaded;
 
         ContentArea.Content = _sourcePage;
     }
 
     private void OnMenuItemSelected(object? sender, AppMenuItem e)
     {
+        _viewModel.NavigateTo(e);
+
         ContentArea.Content = e switch
         {
             AppMenuItem.Source => _sourcePage,
@@ -39,5 +44,15 @@ public partial class MainPage : ContentPage
     private void OnQuitRequested(object? sender, EventArgs e)
     {
         Application.Current?.Quit();
+    }
+
+    private void OnSourceFoldersLoaded(object? sender, List<FileItem> folders)
+    {
+        var providerName = _sourcePage.BindingContext is SourceSelectionViewModel svm
+            ? svm.SelectedProviderName
+            : "Source";
+
+        _viewModel.SetFolders(folders, providerName);
+        FolderPanel.Folders = new ObservableCollection<FileItem>(folders);
     }
 }

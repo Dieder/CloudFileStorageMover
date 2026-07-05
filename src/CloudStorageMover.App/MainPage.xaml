@@ -5,18 +5,33 @@
              x:Class="CloudStorageMover.App.MainPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
-    <Grid ColumnDefinitions="60,Auto,*"
+    <Grid ColumnDefinitions="60,Auto,Auto,Auto,*"
           ColumnSpacing="0">
 
+        <!-- Zone 1: Left Icon Menu -->
         <controls:LeftMenuBar Grid.Column="0"
                               x:Name="MenuBar" />
 
+        <!-- Separator 1 -->
         <BoxView Grid.Column="1"
                  WidthRequest="1"
                  Color="#333333"
                  VerticalOptions="Fill" />
 
-        <ContentView Grid.Column="2"
+        <!-- Zone 2: Folder Panel -->
+        <controls:FolderPanel Grid.Column="2"
+                              x:Name="FolderPanel"
+                              IsVisible="{Binding IsFolderPanelVisible}"
+                              Folders="{Binding CurrentFolders}" />
+
+        <!-- Separator 2 (visible when folder panel is visible) -->
+        <BoxView Grid.Column="3"
+                 WidthRequest="1"
+                 Color="#333333"
+                 VerticalOptions="Fill" />
+
+        <!-- Zone 3+4+5: Content Area -->
+        <ContentView Grid.Column="4"
                      x:Name="ContentArea" />
     </Grid>
 </ContentPage>
