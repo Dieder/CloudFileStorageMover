@@ -1,7 +1,0 @@
-{
-  "providerId": "google-drive",
-  "providerName": "Google Drive",
-  "clientSecretsPath": "config/client_secrets.json",
-  "applicationName": "FileMover",
-  "scopes": ["https://www.googleapis.com/auth/drive.file"]
-}
