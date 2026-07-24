@@ -5,3 +5,7 @@
 file-mover-ui/bin/Debug/System.Reflection.Emit.dll
 /.vs/CopilotSnapshots
 /src/.vs/CloudStorageMover.slnx/copilot-chat/1c9fbcfb/sessions
+
+# App settings with secrets
+src/CloudStorageMover.App/appsettings.json
+/src/.vs
