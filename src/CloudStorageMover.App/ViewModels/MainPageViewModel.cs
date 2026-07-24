@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CloudStorageMover.Controls.Controls;
 using CloudStorageMover.Core.Models;
@@ -14,31 +13,65 @@ public partial class MainPageViewModel : ObservableObject
     private bool _isSourcePageVisible = true;
 
     [ObservableProperty]
+    private bool _isTransferPageVisible;
+
+    [ObservableProperty]
     private bool _isConfigPageVisible;
 
     [ObservableProperty]
-    private bool _isFolderPanelVisible;
+    private bool _isGalleryPageVisible;
 
     [ObservableProperty]
     private string _currentProviderName = string.Empty;
 
-    public ObservableCollection<FileItem> CurrentFolders { get; } = [];
+    [ObservableProperty]
+    private bool _isFileBrowserVisible;
+
+    [ObservableProperty]
+    private string _currentFolderName = string.Empty;
+
+    [ObservableProperty]
+    private int _selectedFilesCount;
+
+    [ObservableProperty]
+    private string _selectedFilesSummary = string.Empty;
 
     public void NavigateTo(AppMenuItem item)
     {
         SelectedMenuItem = item;
         IsSourcePageVisible = item == AppMenuItem.Source;
+        IsTransferPageVisible = item == AppMenuItem.Transfer;
         IsConfigPageVisible = item == AppMenuItem.Configuration;
+        IsGalleryPageVisible = false;
+    }
+
+    public void ShowGallery()
+    {
+        IsSourcePageVisible = false;
+        IsTransferPageVisible = false;
+        IsConfigPageVisible = false;
+        IsGalleryPageVisible = true;
+    }
+
+    public void HideGallery()
+    {
+        IsGalleryPageVisible = false;
     }
 
     public void SetFolders(List<FileItem> folders, string providerName)
     {
-        CurrentFolders.Clear();
-        foreach (var folder in folders)
-            CurrentFolders.Add(folder);
-
         CurrentProviderName = providerName;
-        IsFolderPanelVisible = true;
         IsSourcePageVisible = true;
+        IsFileBrowserVisible = false;
+    }
+
+    public void ShowFileBrowser()
+    {
+        IsFileBrowserVisible = true;
+    }
+
+    public void HideFileBrowser()
+    {
+        IsFileBrowserVisible = false;
     }
 }

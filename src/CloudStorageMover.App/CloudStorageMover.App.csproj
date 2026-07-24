@@ -64,17 +64,27 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<MauiAsset Include="appsettings.json" LogicalName="appsettings.json" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.2" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+	</ItemGroup>
+
 	<ItemGroup>
-	  <ProjectReference Include="..\CloudStorageMover.Core\CloudStorageMover.Core.csproj" />
+		<ProjectReference Include="..\CloudStorageMover.Core\CloudStorageMover.Core.csproj" />
 	  <ProjectReference Include="..\CloudStorageMover.Controls\CloudStorageMover.Controls.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Update="Pages\SourceSelectionPage.xaml" Inflator="Runtime" />
 	</ItemGroup>
 
 </Project>

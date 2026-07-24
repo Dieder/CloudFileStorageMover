@@ -6,5 +6,8 @@ public enum StorageProviderType
     GoogleDrive,
     OneDrive,
     Meta,
-    Prime
+    Prime,
+    Mega,
+    PCloud,
+    GooglePhotos
 }

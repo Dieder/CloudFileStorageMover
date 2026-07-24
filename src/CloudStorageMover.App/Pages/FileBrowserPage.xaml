@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             x:Class="CloudStorageMover.App.Pages.FileBrowserPage"
+             x:DataType="vm:FileSelectionViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="0">
+
+        <Grid Grid.Row="0"
+              Padding="20,20,20,10"
+              ColumnDefinitions="*,Auto"
+              BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#222}">
+            <Label Grid.Column="0"
+                   Text="{Binding CurrentFolderName, StringFormat='📁 {0}'}"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                   VerticalOptions="Center" />
+            <ActivityIndicator Grid.Column="1"
+                               IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="#512BD4"
+                               VerticalOptions="Center" />
+        </Grid>
+
+        <BoxView Grid.Row="1"
+                 HeightRequest="1"
+                 Color="#333333" />
+
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Files}"
+                        x:Name="FileList">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center"
+                                     HorizontalOptions="Center"
+                                     Spacing="8"
+                                     Padding="40">
+                    <Label Text="No files in this folder"
+                           FontSize="18"
+                           TextColor="{AppThemeBinding Light=#999, Dark=#666}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Select a different folder or source"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#bbb, Dark=#555}"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SelectableFileItem">
+                    <Border Stroke="{AppThemeBinding Light=#eee, Dark=#333}"
+                            StrokeThickness="0.5"
+                            Padding="16,12"
+                            BackgroundColor="{AppThemeBinding Light=Transparent, Dark=Transparent}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="0" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="12">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Icon}"
+                                   FontSize="20"
+                                   VerticalOptions="Center"
+                                   TextColor="#512BD4">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FileSelectionViewModel}}, Path=ToggleFileSelectionCommand}"
+                                        CommandParameter="{Binding}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <VerticalStackLayout Grid.Column="1"
+                                                  VerticalOptions="Center">
+                                <Label Text="{Binding Name}"
+                                       FontSize="15"
+                                       TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2"
+                                   Text="{Binding SizeText}"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Grid.Row="3"
+                StrokeThickness="0"
+                Padding="20,12"
+                BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#222}">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="12">
+                <Label Grid.Column="0"
+                       Text="{Binding SelectedSummary}"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#555, Dark=#bbb}"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="Transfer Selected"
+                        Command="{Binding TransferSelectedCommand}"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        CornerRadius="8"
+                        Padding="20,10"
+                        FontSize="15"
+                        FontAttributes="Bold" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

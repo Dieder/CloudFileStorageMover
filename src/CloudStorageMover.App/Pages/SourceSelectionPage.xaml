@@ -2,70 +2,245 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             xmlns:models="clr-namespace:CloudStorageMover.Core.Models"
              x:Class="CloudStorageMover.App.Pages.SourceSelectionPage"
              x:DataType="vm:SourceSelectionViewModel"
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
-    <Grid Padding="30"
-          RowDefinitions="Auto,Auto,*,Auto"
-          RowSpacing="20">
 
-        <Label Grid.Row="0"
-               Text="Select Source"
-               Style="{StaticResource Headline}"
-               FontSize="28" />
+    <Grid RowDefinitions="Auto,*">
 
-        <Label Grid.Row="1"
-               Text="Choose where your files are located:"
-               Style="{StaticResource SubHeadline}"
-               TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
-               FontSize="16" />
+        <!-- PANEL 1: Source Provider Selection -->
+        <Grid Grid.Row="0"
+              IsVisible="{Binding IsSourceVisible}"
+              RowDefinitions="Auto,Auto,Auto,Auto">
+            <Label Grid.Row="0"
+                   Text="Select Source"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   Margin="16,16,16,4"
+                   TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+            <Label Grid.Row="1"
+                   Text="Choose where your files are located:"
+                   FontSize="14"
+                   Margin="16,0,16,8"
+                   TextColor="{AppThemeBinding Light=#666, Dark=#aaa}" />
 
-        <CollectionView Grid.Row="2"
-                        ItemsSource="{Binding Providers}"
-                        SelectionMode="None"
-                        VerticalOptions="Start">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:ProviderItem">
-                    <Border StrokeShape="RoundRectangle CornerRadius=10"
-                            Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
-                            StrokeThickness="1"
-                            Padding="20"
-                            BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#2a2a2a}"
-                            HeightRequest="70">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SourceSelectionViewModel}}, Path=SelectProviderCommand}"
-                                                  CommandParameter="{Binding ProviderType}" />
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="Auto,*"
-                              ColumnSpacing="16">
-                            <Border Grid.Column="0"
-                                    WidthRequest="44"
-                                    HeightRequest="44"
-                                    StrokeShape="RoundRectangle CornerRadius=22"
-                                    StrokeThickness="0"
-                                    BackgroundColor="#512BD4"
-                                    VerticalOptions="Center">
-                                <Label Text="{Binding DisplayName[0]}"
-                                       FontSize="20"
-                                       TextColor="White"
-                                       HorizontalOptions="Center"
+            <!-- Search -->
+            <Border Grid.Row="2"
+                    Margin="16,0,16,0"
+                    StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#333}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <SearchBar Placeholder="Search cloud providers..."
+                           Text="{Binding SearchText}"
+                           BackgroundColor="Transparent"
+                           FontSize="14"
+                           CancelButtonColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                           PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+            </Border>
+
+            <!-- Provider list -->
+            <Border Grid.Row="3"
+                    Margin="16,8,16,0"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
+                    StrokeThickness="1"
+                    BackgroundColor="{AppThemeBinding Light=#fff, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <CollectionView ItemsSource="{Binding FilteredProviders}"
+                                SelectionMode="Single"
+                                SelectedItem="{Binding SelectedProviderItem, Mode=TwoWay}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ProviderItem">
+                            <Grid Padding="14,10"
+                                  ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="12">
+                                <Border Grid.Column="0"
+                                        WidthRequest="36"
+                                        HeightRequest="36"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#512BD4"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="18" />
+                                    </Border.StrokeShape>
+                                    <Label Text="&#x2601;"
+                                           FontSize="16"
+                                           TextColor="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                                <Label Grid.Column="1"
+                                       Text="{Binding DisplayName}"
+                                       FontSize="15"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                                <Label Grid.Column="2"
+                                       Text="&#x25B8;"
+                                       FontSize="14"
+                                       TextColor="{AppThemeBinding Light=#ccc, Dark=#666}"
                                        VerticalOptions="Center" />
-                            </Border>
-                            <VerticalStackLayout Grid.Column="1"
-                                                 VerticalOptions="Center"
-                                                 Spacing="4">
-                                <Label Text="{Binding DisplayName}"
-                                       FontSize="16"
-                                       FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light=#1f1f1f, Dark=#e0e0e0}" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <Label Text="No providers match your search."
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#999, Dark=#666}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Padding="20" />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </Border>
+        </Grid>
+
+        <!-- PANEL 2: File Explorer (shown after source is picked) -->
+        <Grid Grid.Row="1"
+              IsVisible="{Binding IsBrowsingFiles}"
+              RowDefinitions="Auto,Auto,Auto,Auto,*">
+
+            <!-- Header: selected source + change button -->
+            <Border Grid.Row="0"
+                    Margin="16,16,16,0"
+                    StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#333}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <VerticalStackLayout Grid.Column="0"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+                    <Label FontSize="11"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                           Text="Selected Source" />
+                    <Label FontSize="16"
+                           FontAttributes="Bold"
+                           Text="{Binding SelectedProviderName}"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                    <Label FontSize="11"
+                           Text="{Binding SignInStatus}"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1"
+                        Text="Sign In"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="12,6"
+                        CornerRadius="6"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding IsSignedIn, Converter={vm:InvertBoolConverter}}"
+                        Command="{Binding SignInCommand}" />
+                <Button Grid.Column="2"
+                        Text="Change Source"
+                        BackgroundColor="Transparent"
+                        TextColor="#512BD4"
+                        FontSize="12"
+                        Padding="10,6"
+                        VerticalOptions="Center"
+                        Command="{Binding SelectSourceCommand}" />
+            </Grid>
+            </Border>
+
+            <!-- Toolbar: back + filter -->
+            <Grid Grid.Row="1"
+                  Margin="16,8,16,0"
+                  ColumnDefinitions="Auto,*"
+                  ColumnSpacing="8">
+                <Button Grid.Column="0"
+                        Text="&#x25C0;"
+                        FontSize="12"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
+                        Padding="8,4"
+                        Command="{Binding NavigateBackCommand}"
+                        VerticalOptions="Center" />
+                <SearchBar Grid.Column="1"
+                           Placeholder="Filter files..."
+                           Text="{Binding FileFilterText}"
+                           BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#333}"
+                           FontSize="13"
+                           CancelButtonColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                           PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                           HeightRequest="36" />
+            </Grid>
+
+            <!-- Current path -->
+            <Label Grid.Row="2"
+                   Text="{Binding CurrentPath}"
+                   FontSize="12"
+                   Margin="16,4,16,0"
+                   TextColor="{AppThemeBinding Light=#666, Dark=#aaa}" />
+
+            <!-- Loading -->
+            <ActivityIndicator Grid.Row="3"
+                               IsRunning="{Binding IsLoadingFiles}"
+                               IsVisible="{Binding IsLoadingFiles}"
+                               Color="#512BD4"
+                               Margin="16,4,16,4"
+                               HeightRequest="20" />
+
+            <!-- Files and folders list (scrollable) -->
+            <Border Grid.Row="4"
+                    Margin="16,4,16,0"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
+                    StrokeThickness="1"
+                    BackgroundColor="{AppThemeBinding Light=#fff, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <CollectionView ItemsSource="{Binding DisplayItems}"
+                                SelectionMode="Single"
+                                SelectionChanged="OnFileSelectionChanged"
+                                VerticalOptions="FillAndExpand">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:FileItem">
+                            <Grid Padding="12,10"
+                                  ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="12">
+                                <Label Grid.Column="0"
+                                       FontSize="18"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}">
+                                    <Label.Text>
+                                        <Binding Path="IsDirectory">
+                                            <Binding.Converter>
+                                                <vm:BoolToStringConverter TrueValue="&#x1F4C1;" FalseValue="&#x1F4C4;" />
+                                            </Binding.Converter>
+                                        </Binding>
+                                    </Label.Text>
+                                </Label>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       FontSize="14"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="2"
+                                       Text="&#x25B8;"
+                                       FontSize="12"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light=#999, Dark=#666}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <Label Text="No items found."
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#999, Dark=#666}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Margin="0,40,0,0" />
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </Border>
+        </Grid>
     </Grid>
 </ContentView>

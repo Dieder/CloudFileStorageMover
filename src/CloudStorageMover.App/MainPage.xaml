@@ -5,33 +5,85 @@
              x:Class="CloudStorageMover.App.MainPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
-    <Grid ColumnDefinitions="60,Auto,Auto,Auto,*"
-          ColumnSpacing="0">
+    <Grid ColumnDefinitions="60,Auto,*,Auto,60"
+          RowDefinitions="Auto,*,Auto"
+          ColumnSpacing="0"
+          RowSpacing="0">
 
         <!-- Zone 1: Left Icon Menu -->
         <controls:LeftMenuBar Grid.Column="0"
+                              Grid.RowSpan="3"
                               x:Name="MenuBar" />
 
         <!-- Separator 1 -->
         <BoxView Grid.Column="1"
+                 Grid.RowSpan="3"
                  WidthRequest="1"
                  Color="#333333"
                  VerticalOptions="Fill" />
 
-        <!-- Zone 2: Folder Panel -->
-        <controls:FolderPanel Grid.Column="2"
-                              x:Name="FolderPanel"
-                              IsVisible="{Binding IsFolderPanelVisible}"
-                              Folders="{Binding CurrentFolders}" />
+        <!-- Zone 2: Source Selection / File Explorer -->
+        <ContentView Grid.Column="2"
+                      Grid.Row="0"
+                      Grid.RowSpan="2"
+                      x:Name="SourceSelectionArea"
+                      IsVisible="{Binding IsSourcePageVisible}}" />
 
-        <!-- Separator 2 (visible when folder panel is visible) -->
+        <!-- Separator 2 -->
         <BoxView Grid.Column="3"
+                 Grid.Row="0"
+                 Grid.RowSpan="2"
                  WidthRequest="1"
                  Color="#333333"
                  VerticalOptions="Fill" />
 
-        <!-- Zone 3+4+5: Content Area -->
-        <ContentView Grid.Column="4"
-                     x:Name="ContentArea" />
+        <!-- Zone 4: File Browser (shows when IsFileBrowserVisible) -->
+        <ContentView Grid.Column="2"
+                     Grid.Row="1"
+                     Grid.ColumnSpan="3"
+                     x:Name="FileBrowserArea"
+                     IsVisible="{Binding IsFileBrowserVisible}}" />
+
+        <!-- Zone 6: Configuration Page -->
+        <ContentView Grid.Column="2"
+                     Grid.Row="0"
+                     Grid.RowSpan="2"
+                     Grid.ColumnSpan="3"
+                     x:Name="ConfigArea"
+                     IsVisible="{Binding IsConfigPageVisible}}" />
+
+        <!-- Zone 7: Photo Gallery Page -->
+        <ContentView Grid.Column="2"
+                     Grid.Row="0"
+                     Grid.RowSpan="2"
+                     Grid.ColumnSpan="3"
+                     x:Name="GalleryArea"
+                     IsVisible="{Binding IsGalleryPageVisible}}" />
+
+        <!-- Separator 3 -->
+        <BoxView Grid.Column="0"
+                 Grid.ColumnSpan="5"
+                 Grid.Row="2"
+                 HeightRequest="1"
+                 Color="#333333"
+                 HorizontalOptions="Fill" />
+
+        <!-- Zone 5: Bottom Action Bar -->
+        <Grid Grid.Column="0"
+              Grid.ColumnSpan="5"
+              Grid.Row="2"
+              BackgroundColor="#ffffff">
+            <Button Grid.Column="3"
+                    Grid.Row="0"
+                    Text="Transfer"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="20,12"
+                    FontSize="14"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Command="{Binding TransferSelectedFilesCommand}" />
+        </Grid>
     </Grid>
 </ContentPage>

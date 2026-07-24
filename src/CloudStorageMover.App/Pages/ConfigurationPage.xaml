@@ -3,12 +3,172 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
              x:Class="CloudStorageMover.App.Pages.ConfigurationPage"
-             x:DataType="vm:ConfigurationViewModel">
-    <Grid Padding="20"
-          BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
-        <Label Text="Configuration"
-               Style="{StaticResource Headline}"
-               VerticalOptions="Center"
-               HorizontalOptions="Center" />
-    </Grid>
+             x:DataType="vm:ConfigurationViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <ScrollView>
+        <Grid Padding="30"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+              RowSpacing="20">
+
+            <Label Grid.Row="0"
+                   Text="Configuration"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#333333, Dark=#EEEEEE}" />
+
+            <!-- Destination Folder -->
+            <Border Grid.Row="1"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#333}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      RowSpacing="12">
+
+                    <Label Grid.Row="0"
+                           Text="Transfer Destination Folder"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,Auto,Auto"
+                          ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Stroke="{AppThemeBinding Light=#ccc, Dark=#444}"
+                                StrokeThickness="1"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding DestinationPath, Mode=TwoWay}"
+                                   Placeholder="C:\Users\...\Desktop"
+                                   FontSize="14"
+                                   BackgroundColor="Transparent" />
+                        </Border>
+
+                        <Button Grid.Column="1"
+                                Text="Browse"
+                                Command="{Binding BrowseDestinationCommand}"
+                                BackgroundColor="#512BD4"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Padding="16,10"
+                                FontSize="14" />
+
+                        <Button Grid.Column="2"
+                                Text="Reset"
+                                Command="{Binding ResetToDesktopCommand}"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Padding="16,10"
+                                FontSize="14" />
+                    </Grid>
+
+                    <Label Grid.Row="2"
+                           FontSize="13"
+                           Grid.ColumnSpan="3"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsDestinationValid}"
+                                         Value="True">
+                                <Setter Property="Text" Value="✅ Destination folder is valid" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsDestinationValid}"
+                                         Value="False">
+                                <Setter Property="Text" Value="❌ Destination folder does not exist" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <!-- Google Photos Download Folder -->
+            <Border Grid.Row="2"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#333}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      RowSpacing="12">
+
+                    <Label Grid.Row="0"
+                           Text="Google Photos Download Folder"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,Auto,Auto"
+                          ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Stroke="{AppThemeBinding Light=#ccc, Dark=#444}"
+                                StrokeThickness="1"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding GooglePhotosDownloadPath, Mode=TwoWay}"
+                                   Placeholder="C:\Users\...\Desktop\Google Photos"
+                                   FontSize="14"
+                                   BackgroundColor="Transparent" />
+                        </Border>
+
+                        <Button Grid.Column="1"
+                                Text="Browse"
+                                Command="{Binding BrowseGooglePhotosDownloadCommand}"
+                                BackgroundColor="#512BD4"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Padding="16,10"
+                                FontSize="14" />
+
+                        <Button Grid.Column="2"
+                                Text="Reset"
+                                Command="{Binding ResetGooglePhotosToDesktopCommand}"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Padding="16,10"
+                                FontSize="14" />
+                    </Grid>
+
+                    <Label Grid.Row="2"
+                           FontSize="13"
+                           Grid.ColumnSpan="3"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsGooglePhotosDownloadValid}"
+                                         Value="True">
+                                <Setter Property="Text" Value="✅ Download folder is valid" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsGooglePhotosDownloadValid}"
+                                         Value="False">
+                                <Setter Property="Text" Value="❌ Download folder does not exist" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <!-- Help text -->
+            <Label Grid.Row="3"
+                   Text="Files will be downloaded to the destination folder. If a file already exists, a number suffix will be added."
+                   FontSize="13"
+                   TextColor="{AppThemeBinding Light=#999, Dark=#666}" />
+        </Grid>
+    </ScrollView>
 </ContentView>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             x:Class="CloudStorageMover.App.Pages.TransferPage"
+             x:DataType="vm:TransferViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <Grid Padding="30"
+          RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="20">
+
+        <Label Grid.Row="0"
+               Text="Transfers"
+               FontSize="28"
+               FontAttributes="Bold"
+               TextColor="{AppThemeBinding Light=#333333, Dark=#EEEEEE}" />
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="12">
+            <Button Text="Cancel All"
+                    Command="{Binding CancelAllCommand}"
+                    IsVisible="{Binding HasActiveJobs}"
+                    BackgroundColor="#e74c3c"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="16,10"
+                    FontSize="14" />
+
+            <Button Text="Clear Completed"
+                    Command="{Binding ClearCompletedCommand}"
+                    BackgroundColor="#555"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="16,10"
+                    FontSize="14" />
+        </HorizontalStackLayout>
+
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding ActiveJobs}">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center"
+                                     HorizontalOptions="Center"
+                                     Spacing="10">
+                    <Label Text="No active transfers"
+                           FontSize="18"
+                           TextColor="{AppThemeBinding Light=#999, Dark=#666}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Select files from a source to start downloading"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#bbb, Dark=#555}"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:DownloadJobItem">
+                    <Border Stroke="{AppThemeBinding Light=#ddd, Dark=#333}"
+                            StrokeThickness="1"
+                            Padding="16"
+                            Margin="0,0,0,8"
+                            BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8" />
+                        </Border.StrokeShape>
+                        <Grid RowDefinitions="Auto,Auto,Auto"
+                              RowSpacing="8">
+
+                            <Label Grid.Row="0"
+                                   Text="{Binding FileName}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Grid Grid.Row="1"
+                                  ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="12">
+                                <ProgressBar Grid.Column="0"
+                                             Progress="{Binding Progress}"
+                                             ProgressColor="#512BD4"
+                                             VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding ProgressText}"
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light=#666, Dark=#aaa}"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End" />
+                            </Grid>
+
+                            <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                                <Label Text="{Binding StateText}"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#888, Dark=#bbb}"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <CollectionView Grid.Row="3"
+                        ItemsSource="{Binding CompletedJobs}"
+                        MaximumHeightRequest="200">
+            <CollectionView.Header>
+                <Label Text="Completed"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       Margin="0,12,0,8"
+                       TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+            </CollectionView.Header>
+            <CollectionView.EmptyView>
+                <Label Text="No completed transfers"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#bbb, Dark=#555}"
+                       HorizontalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:DownloadJobItem">
+                    <HorizontalStackLayout Spacing="12" Padding="8,4">
+                        <Label Text="{Binding FileName}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                               LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding StateText}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" />
+                    </HorizontalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentView>

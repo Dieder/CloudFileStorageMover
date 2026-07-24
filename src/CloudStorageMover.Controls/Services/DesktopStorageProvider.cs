@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using CloudStorageMover.Core.Interfaces;
 using CloudStorageMover.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -16,7 +18,7 @@ public class DesktopStorageProvider : IStorageProviderService
         _logger = logger;
     }
 
-    public Task<List<string>> GetCommonDirectoriesAsync()
+    public Task<List<string>> GetCommonDirectoriesAsync(CancellationToken ct = default)
     {
         var dirs = new List<string>
         {
@@ -31,7 +33,7 @@ public class DesktopStorageProvider : IStorageProviderService
         return Task.FromResult(dirs.Where(Directory.Exists).Distinct().ToList());
     }
 
-    public Task<List<FileItem>> ListFoldersAsync(string path)
+    public Task<List<FileItem>> ListFoldersAsync(string path, CancellationToken ct = default)
     {
         try
         {
@@ -56,7 +58,7 @@ public class DesktopStorageProvider : IStorageProviderService
         }
     }
 
-    public Task<List<FileItem>> ListFilesAsync(string path)
+    public Task<List<FileItem>> ListFilesAsync(string path, CancellationToken ct = default)
     {
         try
         {
@@ -82,28 +84,62 @@ public class DesktopStorageProvider : IStorageProviderService
         }
     }
 
-    public Task UploadAsync(string localPath, string remotePath, Stream content)
+    public async Task UploadAsync(string localPath, string remotePath, Stream content, IProgress<double>? progress = null, CancellationToken ct = default)
     {
         var dir = Path.GetDirectoryName(remotePath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
             Directory.CreateDirectory(dir);
 
         using var fs = new FileStream(remotePath, FileMode.Create, FileAccess.Write);
-        content.CopyTo(fs);
-        return Task.CompletedTask;
+
+        if (progress != null && content.CanSeek)
+        {
+            var buffer = new byte[81920];
+            long totalBytes = content.Length;
+            long bytesWritten = 0;
+            int bytesRead;
+            while ((bytesRead = await content.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
+            {
+                await fs.WriteAsync(buffer, 0, bytesRead, ct);
+                bytesWritten += bytesRead;
+                progress.Report((double)bytesWritten / totalBytes);
+            }
+        }
+        else
+        {
+            await content.CopyToAsync(fs, 81920, ct);
+        }
     }
 
-    public Task DownloadAsync(string remotePath, string localPath)
+    public async Task DownloadAsync(string remotePath, string localPath, IProgress<double>? progress = null, CancellationToken ct = default)
     {
         var dir = Path.GetDirectoryName(localPath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
             Directory.CreateDirectory(dir);
 
-        File.Copy(remotePath, localPath, overwrite: true);
-        return Task.CompletedTask;
+        using var source = new FileStream(remotePath, FileMode.Open, FileAccess.Read);
+        using var dest = new FileStream(localPath, FileMode.Create, FileAccess.Write);
+
+        if (progress != null && source.CanSeek)
+        {
+            var buffer = new byte[81920];
+            long totalBytes = source.Length;
+            long bytesRead = 0;
+            int read;
+            while ((read = await source.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
+            {
+                await dest.WriteAsync(buffer, 0, read, ct);
+                bytesRead += read;
+                progress.Report((double)bytesRead / totalBytes);
+            }
+        }
+        else
+        {
+            await source.CopyToAsync(dest, 81920, ct);
+        }
     }
 
-    public Task DeleteAsync(string path)
+    public Task DeleteAsync(string path, CancellationToken ct = default)
     {
         if (Directory.Exists(path))
             Directory.Delete(path, recursive: true);
@@ -111,5 +147,10 @@ public class DesktopStorageProvider : IStorageProviderService
             File.Delete(path);
 
         return Task.CompletedTask;
+    }
+
+    public Task<Stream> OpenReadStreamAsync(string remotePath, CancellationToken ct = default)
+    {
+        return Task.FromResult((Stream)File.OpenRead(remotePath));
     }
 }

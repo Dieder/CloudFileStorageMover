@@ -2,4 +2,5 @@
   <Project Path="CloudStorageMover.App/CloudStorageMover.App.csproj" />
   <Project Path="CloudStorageMover.Controls/CloudStorageMover.Controls.csproj" />
   <Project Path="CloudStorageMover.Core/CloudStorageMover.Core.csproj" />
+  <Project Path="Custom.Google.Services/Custom.Google.Services.csproj" />
 </Solution>

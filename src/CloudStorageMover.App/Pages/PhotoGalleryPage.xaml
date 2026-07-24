@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             x:Class="CloudStorageMover.App.Pages.PhotoGalleryPage"
+             x:DataType="vm:PhotoGalleryViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <vm:InvertBoolConverter x:Key="InvertBool" />
+            <DataTemplate x:Key="PhotoItemTemplate" x:DataType="vm:PhotoItem">
+                <Grid WidthRequest="150"
+                      HeightRequest="150"
+                      Margin="0,0,8,8">
+                    <Image Source="{Binding FilePath}"
+                           Aspect="AspectFill" />
+                    <Border BackgroundColor="#80000000"
+                            VerticalOptions="End"
+                            StrokeThickness="0">
+                        <Label Text="{Binding FileName}"
+                               TextColor="White"
+                               FontSize="10"
+                               LineBreakMode="TailTruncation"
+                               MaxLines="1"
+                               Padding="4,2" />
+                    </Border>
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentView.Resources>
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0"
+              Padding="20,15"
+              BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Text="📷"
+                   FontSize="24"
+                   VerticalOptions="Center" />
+
+            <Label Grid.Column="1"
+                   Text="{Binding Title}"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                   Margin="10,0,0,0"
+                   VerticalOptions="Center" />
+
+            <Button Grid.Column="2"
+                    Text="Back to Picker"
+                    Clicked="OnBackClicked"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="16,8"
+                    FontSize="13" />
+        </Grid>
+
+        <!-- Loading indicator -->
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           Color="#512BD4"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+
+        <!-- Photo groups -->
+        <ScrollView Grid.Row="1"
+                    IsVisible="{Binding IsLoading, Converter={StaticResource InvertBool}}">
+            <VerticalStackLayout Padding="20" Spacing="20">
+                <CollectionView ItemsSource="{Binding Groups}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PhotoGroup">
+                            <VerticalStackLayout Spacing="10">
+                                <!-- Group header -->
+                                <Label Text="{Binding Title}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                       Margin="0,10,0,0" />
+
+                                <!-- Photos grid -->
+                                <FlexLayout BindableLayout.ItemsSource="{Binding Photos}"
+                                            BindableLayout.ItemTemplate="{StaticResource PhotoItemTemplate}"
+                                            Wrap="Wrap"
+                                            JustifyContent="Start" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentView>
