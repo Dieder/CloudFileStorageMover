@@ -5,6 +5,7 @@ public enum AppMenuItem
     Source,
     GooglePhotosPicker,
     Gallery,
+    CameraImport,
     Configuration,
     Transfer,
     Quit
@@ -20,6 +21,7 @@ public partial class LeftMenuBar : ContentView
     public event EventHandler? QuitRequested;
     public event EventHandler? PhotosPickerRequested;
     public event EventHandler? GalleryRequested;
+    public event EventHandler? CameraImportRequested;
 
     public AppMenuItem SelectedItem
     {
@@ -44,6 +46,7 @@ public partial class LeftMenuBar : ContentView
         SourceButton.BackgroundColor = item == AppMenuItem.Source ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
         PhotosPickerButton.BackgroundColor = item == AppMenuItem.GooglePhotosPicker ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
         GalleryButton.BackgroundColor = item == AppMenuItem.Gallery ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
+        CameraImportButton.BackgroundColor = item == AppMenuItem.CameraImport ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
         TransferButton.BackgroundColor = item == AppMenuItem.Transfer ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
         ConfigButton.BackgroundColor = item == AppMenuItem.Configuration ? Color.FromArgb("#3a3a3a") : Colors.Transparent;
     }
@@ -62,6 +65,11 @@ public partial class LeftMenuBar : ContentView
     private void OnGalleryClicked(object? sender, EventArgs e)
     {
         GalleryRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnCameraImportClicked(object? sender, EventArgs e)
+    {
+        CameraImportRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnTransferClicked(object? sender, EventArgs e)

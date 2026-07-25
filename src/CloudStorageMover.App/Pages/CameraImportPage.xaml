@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             x:Class="CloudStorageMover.App.Pages.CameraImportPage"
+             x:DataType="vm:CameraImportViewModel"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
+          RowSpacing="0">
+
+        <!-- Header -->
+        <Grid Grid.Row="0"
+              Padding="20,15"
+              BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   Text="📷"
+                   FontSize="24"
+                   VerticalOptions="Center" />
+
+            <Label Grid.Column="1"
+                   Text="Camera Import"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                   Margin="10,0,0,0"
+                   VerticalOptions="Center" />
+
+            <Button Grid.Column="2"
+                    Text="Back"
+                    Clicked="OnBackClicked"
+                    BackgroundColor="#555"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Padding="16,8"
+                    FontSize="13" />
+        </Grid>
+
+        <!-- Windows-only warning -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding IsWindowsOnly}"
+                BackgroundColor="#FFF3CD"
+                Padding="15,10"
+                StrokeThickness="0">
+            <Label Text="⚠ Camera import is only available on Windows."
+                   TextColor="#856404"
+                   FontSize="13" />
+        </Border>
+
+        <!-- PTP info -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding IsNotWindowsOnly}"
+                BackgroundColor="#D4EDDA"
+                Padding="15,10"
+                StrokeThickness="0">
+            <Label Text="💡 For MTP cameras, set your camera to PTP mode in USB connection settings."
+                   TextColor="#155724"
+                   FontSize="13" />
+        </Border>
+
+        <!-- Content area -->
+        <Grid Grid.Row="2"
+              Padding="20">
+
+            <!-- Device selection -->
+            <VerticalStackLayout IsVisible="{Binding IsDeviceListVisible}"
+                                 Spacing="15">
+                <Label Text="Select a camera or device:"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+
+                <CollectionView ItemsSource="{Binding Devices}"
+                                SelectionMode="Single"
+                                SelectionChanged="OnDeviceSelected">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CameraDeviceItem">
+                            <Border Padding="15,12"
+                                    Margin="0,0,0,8"
+                                    Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2a2a2a}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Label Grid.Column="0"
+                                           Text="📷"
+                                           FontSize="28"
+                                           VerticalOptions="Center"
+                                           Margin="0,0,12,0" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding DisplayName}"
+                                           FontSize="16"
+                                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                           VerticalOptions="Center" />
+                                    <Border Grid.Column="2"
+                                            BackgroundColor="{AppThemeBinding Light=#eee, Dark=#444}"
+                                            Padding="6,2"
+                                            StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="4" />
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding ConnectionType}"
+                                               FontSize="11"
+                                               TextColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                                               VerticalOptions="Center" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="🔍 Scan for Devices"
+                        Clicked="OnScanClicked"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        CornerRadius="8"
+                        Padding="20,12"
+                        FontSize="14"
+                        HorizontalOptions="Start" />
+            </VerticalStackLayout>
+
+            <!-- Photo list (after device selected) -->
+            <VerticalStackLayout IsVisible="{Binding IsPhotoListVisible}"
+                                 Spacing="10">
+
+                <!-- Controls -->
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                      ColumnSpacing="8">
+                    <Button Grid.Column="0"
+                            Text="← Devices"
+                            Clicked="OnBackToDevicesClicked"
+                            BackgroundColor="#555"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Padding="12,8"
+                            FontSize="13"
+                            VerticalOptions="Center" />
+
+                    <Label Grid.Column="1"
+                           Text="{Binding PhotoCount, StringFormat='{0} photos found'}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                           VerticalOptions="Center" />
+
+                    <HorizontalStackLayout Grid.Column="2"
+                                           Spacing="8"
+                                           VerticalOptions="Center">
+                        <CheckBox IsChecked="{Binding DeleteAfterImport}"
+                                  VerticalOptions="Center" />
+                        <Label Text="Delete after import"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <Button Grid.Column="3"
+                            Text="Import All"
+                            Clicked="OnImportClicked"
+                            BackgroundColor="#27ae60"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Padding="16,8"
+                            FontSize="13" />
+                </Grid>
+
+                <!-- Import preview -->
+                <Border IsVisible="{Binding IsImportPreviewVisible}"
+                        BackgroundColor="{AppThemeBinding Light=#E8F4FD, Dark=#1a3a5c}"
+                        Padding="15,10"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 6">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#155724, Dark=#A5D6A7}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding ToImportCount, StringFormat='{0} new'}" />
+                                    <Span Text=" photos to import" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label IsVisible="{Binding AlreadyExistsCount}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#856404, Dark=#FFD54F}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding AlreadyExistsCount, StringFormat='{0}'}" />
+                                    <Span Text=" already on destination (will be skipped)" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Loading -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="#512BD4"
+                                   HorizontalOptions="Center" />
+
+                <!-- Photos -->
+                <CollectionView ItemsSource="{Binding Photos}"
+                                SelectionMode="None"
+                                HeightRequest="400">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CameraPhotoItem">
+                            <Border Padding="12,8"
+                                    Margin="0,0,0,4"
+                                    Stroke="{AppThemeBinding Light=#eee, Dark=#333}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2a2a2a}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="6" />
+                                </Border.StrokeShape>
+                                <Grid ColumnDefinitions="*,Auto,Auto"
+                                      ColumnSpacing="12">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding FileName}"
+                                           FontSize="14"
+                                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding DateText}"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="2"
+                                           Text="{Binding SizeText}"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light=#888, Dark=#aaa}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Status -->
+                <Label Text="{Binding StatusMessage}"
+                       FontSize="13"
+                       TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentView>

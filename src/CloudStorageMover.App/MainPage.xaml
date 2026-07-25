@@ -60,6 +60,14 @@
                      x:Name="GalleryArea"
                      IsVisible="{Binding IsGalleryPageVisible}}" />
 
+        <!-- Zone 8: Camera Import Page -->
+        <ContentView Grid.Column="2"
+                     Grid.Row="0"
+                     Grid.RowSpan="2"
+                     Grid.ColumnSpan="3"
+                     x:Name="CameraImportArea"
+                     IsVisible="{Binding IsCameraImportPageVisible}}" />
+
         <!-- Separator 3 -->
         <BoxView Grid.Column="0"
                  Grid.ColumnSpan="5"

@@ -16,6 +16,7 @@ public partial class MainPage : ContentPage
     private readonly TransferPage _transferPage;
     private readonly ConfigurationPage _configPage;
     private readonly PhotoGalleryPage _galleryPage;
+    private readonly CameraImportPage _cameraImportPage;
     private readonly SelectedFilesService _selectedFiles;
     private readonly GooglePhotosPickerService _photosPicker;
     private readonly DestinationSettingsService _destinationSettings;
@@ -26,6 +27,7 @@ public partial class MainPage : ContentPage
                     TransferPage transferPage,
                     ConfigurationPage configPage,
                     PhotoGalleryPage galleryPage,
+                    CameraImportPage cameraImportPage,
                     SelectedFilesService selectedFiles,
                     GooglePhotosPickerService photosPicker,
                     DestinationSettingsService destinationSettings)
@@ -37,6 +39,7 @@ public partial class MainPage : ContentPage
         _transferPage = transferPage;
         _configPage = configPage;
         _galleryPage = galleryPage;
+        _cameraImportPage = cameraImportPage;
         _selectedFiles = selectedFiles;
         _photosPicker = photosPicker;
         _destinationSettings = destinationSettings;
@@ -46,11 +49,13 @@ public partial class MainPage : ContentPage
         MenuBar.QuitRequested += OnQuitRequested;
         MenuBar.PhotosPickerRequested += OnPhotosPickerRequested;
         MenuBar.GalleryRequested += OnGalleryRequested;
+        MenuBar.CameraImportRequested += OnCameraImportRequested;
         _sourcePage.FoldersLoaded += OnSourceFoldersLoaded;
         _sourcePage.ProviderChanging += OnProviderChanging;
         _fileBrowserPage.NavigateToTransferRequested += OnNavigateToTransferRequested;
         _fileBrowserPage.FolderSelected += OnFolderSelected;
         _galleryPage.BackRequested += OnGalleryBackRequested;
+        _cameraImportPage.BackRequested += OnCameraImportBackRequested;
 
         SourceSelectionArea.Content = _sourcePage;
     }
@@ -118,6 +123,12 @@ public partial class MainPage : ContentPage
         _viewModel.NavigateTo(AppMenuItem.Source);
     }
 
+    private void OnCameraImportBackRequested(object? sender, EventArgs e)
+    {
+        _viewModel.HideCameraImport();
+        _viewModel.NavigateTo(AppMenuItem.Source);
+    }
+
     private void OnGalleryRequested(object? sender, EventArgs e)
     {
         var downloadFolder = _destinationSettings.GooglePhotosDownloadPath;
@@ -132,6 +143,15 @@ public partial class MainPage : ContentPage
 
         _galleryPage.LoadPhotos(downloadFolder);
         _viewModel.ShowGallery();
+    }
+
+    private void OnCameraImportRequested(object? sender, EventArgs e)
+    {
+        if (CameraImportArea.Content == null)
+            CameraImportArea.Content = _cameraImportPage;
+
+        _cameraImportPage.RefreshDevices();
+        _viewModel.ShowCameraImport();
     }
 
     private async void OnPhotosPickerRequested(object? sender, EventArgs e)

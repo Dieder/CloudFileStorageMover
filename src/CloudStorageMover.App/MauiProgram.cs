@@ -75,6 +75,7 @@ public static class MauiProgram
         builder.Services.AddTransient<TransferViewModel>();
         builder.Services.AddTransient<ConfigurationViewModel>();
         builder.Services.AddTransient<CloudStorageMover.App.ViewModels.PhotoGalleryViewModel>();
+        builder.Services.AddTransient<CloudStorageMover.App.ViewModels.CameraImportViewModel>();
 
         // Pages
         builder.Services.AddTransient<MainPage>();
@@ -83,6 +84,7 @@ public static class MauiProgram
         builder.Services.AddTransient<TransferPage>();
         builder.Services.AddTransient<ConfigurationPage>();
         builder.Services.AddTransient<CloudStorageMover.App.Pages.PhotoGalleryPage>();
+        builder.Services.AddTransient<CloudStorageMover.App.Pages.CameraImportPage>();
 
         // App Services
         var destinationSettings = new DestinationSettingsService(FileSystem.AppDataDirectory);

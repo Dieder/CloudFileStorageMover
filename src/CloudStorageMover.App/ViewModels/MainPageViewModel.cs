@@ -22,6 +22,9 @@ public partial class MainPageViewModel : ObservableObject
     private bool _isGalleryPageVisible;
 
     [ObservableProperty]
+    private bool _isCameraImportPageVisible;
+
+    [ObservableProperty]
     private string _currentProviderName = string.Empty;
 
     [ObservableProperty]
@@ -43,6 +46,7 @@ public partial class MainPageViewModel : ObservableObject
         IsTransferPageVisible = item == AppMenuItem.Transfer;
         IsConfigPageVisible = item == AppMenuItem.Configuration;
         IsGalleryPageVisible = false;
+        IsCameraImportPageVisible = false;
     }
 
     public void ShowGallery()
@@ -51,11 +55,26 @@ public partial class MainPageViewModel : ObservableObject
         IsTransferPageVisible = false;
         IsConfigPageVisible = false;
         IsGalleryPageVisible = true;
+        IsCameraImportPageVisible = false;
+    }
+
+    public void ShowCameraImport()
+    {
+        IsSourcePageVisible = false;
+        IsTransferPageVisible = false;
+        IsConfigPageVisible = false;
+        IsGalleryPageVisible = false;
+        IsCameraImportPageVisible = true;
     }
 
     public void HideGallery()
     {
         IsGalleryPageVisible = false;
+    }
+
+    public void HideCameraImport()
+    {
+        IsCameraImportPageVisible = false;
     }
 
     public void SetFolders(List<FileItem> folders, string providerName)

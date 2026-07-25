@@ -76,6 +76,7 @@
 
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+		<PackageReference Include="MediaDevices" Version="1.10.0" />
 	</ItemGroup>
 
 	<ItemGroup>
