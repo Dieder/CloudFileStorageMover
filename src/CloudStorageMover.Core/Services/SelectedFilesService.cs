@@ -1,11 +1,14 @@
 using CloudStorageMover.Core.Interfaces;
 using CloudStorageMover.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CloudStorageMover.Core.Services;
 
 public class SelectedFilesService
 {
+    private readonly DestinationSettingsService _destinationSettings;
     private readonly List<SelectedFile> _files = new();
+    private readonly ILogger<SelectedFilesService>? _logger;
 
     public IReadOnlyList<SelectedFile> Files => _files.AsReadOnly();
 
@@ -18,6 +21,12 @@ public class SelectedFilesService
 
     public event Action? SelectionChanged;
     public event Action? ProviderChanged;
+
+    public SelectedFilesService(DestinationSettingsService destinationSettings, ILogger<SelectedFilesService>? logger = null)
+    {
+        _destinationSettings = destinationSettings;
+        _logger = logger;
+    }
 
     public void SetProvider(IStorageProviderService provider)
     {
@@ -36,6 +45,7 @@ public class SelectedFilesService
         if (_files.Any(f => f.FileId == item.FullPath))
             return;
 
+        _logger?.LogInformation("AddFile: {Name} (total={Count})", item.Name, _files.Count + 1);
         _files.Add(new SelectedFile
         {
             FileId = item.FullPath,
@@ -74,30 +84,15 @@ public class SelectedFilesService
 
     public void Clear()
     {
+        _logger?.LogWarning("Clear called! Count={Count}. Stack trace: {Trace}",
+            _files.Count, Environment.StackTrace);
         _files.Clear();
         SelectionChanged?.Invoke();
     }
 
-    public (string LocalPath, string RemotePath, IStorageProviderService Provider) ResolveDownloadTarget(SelectedFile file)
-    {
-        var destDir = GetDestinationDirectory();
-        var localPath = Path.Combine(destDir, file.FileName);
-
-        var counter = 1;
-        while (File.Exists(localPath))
-        {
-            var nameWithoutExt = Path.GetFileNameWithoutExtension(file.FileName);
-            var ext = Path.GetExtension(file.FileName);
-            localPath = Path.Combine(destDir, $"{nameWithoutExt} ({counter}){ext}");
-            counter++;
-        }
-
-        return (localPath, file.RemotePath, CurrentProvider!);
-    }
-
     public string GetDestinationDirectory()
     {
-        return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        return _destinationSettings.DestinationPath;
     }
 }
 

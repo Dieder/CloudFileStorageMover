@@ -38,5 +38,4 @@ public class AppSettingsService
     public string? GoogleDriveSecret => GetValue("googleauthsettings", "secret");
     public string? GooglePhotosClientId => GetValue("googleauthsettings", "clientId");
     public string? GooglePhotosSecret => GetValue("googleauthsettings", "secret");
-    public string? MegaKey => GetValue("megasettings", "key");
 }

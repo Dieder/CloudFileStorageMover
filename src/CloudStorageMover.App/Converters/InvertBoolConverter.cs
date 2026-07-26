@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace CloudStorageMover.App.ViewModels;
+namespace CloudStorageMover.App.Converters;
 
 public class InvertBoolConverter : IValueConverter
 {

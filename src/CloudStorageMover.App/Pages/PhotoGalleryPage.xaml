@@ -7,7 +7,6 @@
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
     <ContentView.Resources>
         <ResourceDictionary>
-            <vm:InvertBoolConverter x:Key="InvertBool" />
             <DataTemplate x:Key="PhotoItemTemplate" x:DataType="vm:PhotoItem">
                 <Grid WidthRequest="150"
                       HeightRequest="150"
@@ -73,7 +72,7 @@
 
         <!-- Photo groups -->
         <ScrollView Grid.Row="1"
-                    IsVisible="{Binding IsLoading, Converter={StaticResource InvertBool}}">
+                    IsVisible="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}">
             <VerticalStackLayout Padding="20" Spacing="20">
                 <CollectionView ItemsSource="{Binding Groups}"
                                 SelectionMode="None">

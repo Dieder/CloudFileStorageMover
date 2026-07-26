@@ -52,10 +52,12 @@ public partial class MainPage : ContentPage
         MenuBar.CameraImportRequested += OnCameraImportRequested;
         _sourcePage.FoldersLoaded += OnSourceFoldersLoaded;
         _sourcePage.ProviderChanging += OnProviderChanging;
+        _sourcePage.TransferRequested += OnTransferRequested;
         _fileBrowserPage.NavigateToTransferRequested += OnNavigateToTransferRequested;
         _fileBrowserPage.FolderSelected += OnFolderSelected;
         _galleryPage.BackRequested += OnGalleryBackRequested;
         _cameraImportPage.BackRequested += OnCameraImportBackRequested;
+        _transferPage.BackRequested += OnTransferBackRequested;
 
         SourceSelectionArea.Content = _sourcePage;
     }
@@ -66,6 +68,13 @@ public partial class MainPage : ContentPage
 
         if (e == AppMenuItem.Configuration && ConfigArea.Content == null)
             ConfigArea.Content = _configPage;
+
+        if (e == AppMenuItem.Transfer)
+        {
+            if (TransferArea.Content == null)
+                TransferArea.Content = _transferPage;
+            _transferPage.Refresh();
+        }
     }
 
     private void OnQuitRequested(object? sender, EventArgs e)
@@ -117,6 +126,11 @@ public partial class MainPage : ContentPage
         OnMenuItemSelected(this, AppMenuItem.Transfer);
     }
 
+    private void OnTransferRequested(object? sender, EventArgs e)
+    {
+        OnMenuItemSelected(this, AppMenuItem.Transfer);
+    }
+
     private void OnGalleryBackRequested(object? sender, EventArgs e)
     {
         _viewModel.HideGallery();
@@ -126,6 +140,11 @@ public partial class MainPage : ContentPage
     private void OnCameraImportBackRequested(object? sender, EventArgs e)
     {
         _viewModel.HideCameraImport();
+        _viewModel.NavigateTo(AppMenuItem.Source);
+    }
+
+    private void OnTransferBackRequested(object? sender, EventArgs e)
+    {
         _viewModel.NavigateTo(AppMenuItem.Source);
     }
 

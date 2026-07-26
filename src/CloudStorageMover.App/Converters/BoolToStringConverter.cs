@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace CloudStorageMover.App.ViewModels;
+namespace CloudStorageMover.App.Converters;
 
 public class BoolToStringConverter : IValueConverter
 {
@@ -9,6 +9,11 @@ public class BoolToStringConverter : IValueConverter
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        if (parameter is string param && param.Contains('|'))
+        {
+            var parts = param.Split('|');
+            return value is true ? parts[0] : parts[1];
+        }
         return value is true ? TrueValue : FalseValue;
     }
 

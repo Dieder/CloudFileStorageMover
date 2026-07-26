@@ -3,9 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
              xmlns:models="clr-namespace:CloudStorageMover.Core.Models"
+             xmlns:conv="clr-namespace:CloudStorageMover.App.Converters"
              x:Class="CloudStorageMover.App.Pages.SourceSelectionPage"
              x:DataType="vm:SourceSelectionViewModel"
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <conv:BoolToColorConverter x:Key="MultiSelectColorConverter"
+                                       TrueValue="#512BD4" FalseValue="#555" />
+            <conv:BoolToStringConverter x:Key="FileTypeIconConverter"
+                                        TrueValue="&#x1F4C1;" FalseValue="&#x1F4C4;" />
+            <conv:BoolToStringConverter x:Key="SelectionIconConverter"
+                                        TrueValue="&#x2611;" FalseValue="&#x2610;" />
+        </ResourceDictionary>
+    </ContentView.Resources>
 
     <Grid RowDefinitions="Auto,*">
 
@@ -135,7 +146,7 @@
                         Padding="12,6"
                         CornerRadius="6"
                         VerticalOptions="Center"
-                        IsVisible="{Binding IsSignedIn, Converter={vm:InvertBoolConverter}}"
+                        IsVisible="{Binding IsSignedIn, Converter={StaticResource InvertBoolConverter}}"
                         Command="{Binding SignInCommand}" />
                 <Button Grid.Column="2"
                         Text="Change Source"
@@ -151,7 +162,7 @@
             <!-- Toolbar: back + filter -->
             <Grid Grid.Row="1"
                   Margin="16,8,16,0"
-                  ColumnDefinitions="Auto,*"
+                  ColumnDefinitions="Auto,*,Auto,Auto"
                   ColumnSpacing="8">
                 <Button Grid.Column="0"
                         Text="&#x25C0;"
@@ -170,6 +181,24 @@
                            PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}"
                            TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
                            HeightRequest="36" />
+                <Button Grid.Column="2"
+                        Text="Multi-select"
+                        FontSize="11"
+                        BackgroundColor="{Binding IsMultiSelectMode, Converter={StaticResource MultiSelectColorConverter}}"
+                        TextColor="White"
+                        Padding="8,4"
+                        CornerRadius="6"
+                        Command="{Binding ToggleMultiSelectCommand}"
+                        VerticalOptions="Center" />
+                <Button Grid.Column="3"
+                        Text="Select All"
+                        FontSize="11"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
+                        Padding="8,4"
+                        Command="{Binding SelectAllVisibleCommand}"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding IsMultiSelectMode}" />
             </Grid>
 
             <!-- Current path -->
@@ -196,50 +225,110 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>
-                <CollectionView ItemsSource="{Binding DisplayItems}"
-                                SelectionMode="Single"
-                                SelectionChanged="OnFileSelectionChanged"
-                                VerticalOptions="FillAndExpand">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:FileItem">
-                            <Grid Padding="12,10"
-                                  ColumnDefinitions="Auto,*,Auto"
-                                  ColumnSpacing="12">
-                                <Label Grid.Column="0"
-                                       FontSize="18"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}">
-                                    <Label.Text>
-                                        <Binding Path="IsDirectory">
-                                            <Binding.Converter>
-                                                <vm:BoolToStringConverter TrueValue="&#x1F4C1;" FalseValue="&#x1F4C4;" />
-                                            </Binding.Converter>
-                                        </Binding>
-                                    </Label.Text>
-                                </Label>
-                                <Label Grid.Column="1"
-                                       Text="{Binding Name}"
-                                       FontSize="14"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
-                                       LineBreakMode="TailTruncation" />
-                                <Label Grid.Column="2"
-                                       Text="&#x25B8;"
-                                       FontSize="12"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light=#999, Dark=#666}" />
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                    <CollectionView.EmptyView>
-                        <Label Text="No items found."
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light=#999, Dark=#666}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               Margin="0,40,0,0" />
-                    </CollectionView.EmptyView>
-                </CollectionView>
+                <Grid>
+                    <CollectionView x:Name="FilesCollection"
+                                    ItemsSource="{Binding DisplayItems}"
+                                    SelectionMode="None"
+                                    VerticalOptions="FillAndExpand">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SelectableFileItem">
+                                <Grid Padding="12,10"
+                                      ColumnDefinitions="Auto,Auto,*,Auto"
+                                      ColumnSpacing="12">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnItemTapped"
+                                                              CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+
+                                    <!-- Select checkbox (visible in multi-select mode) -->
+                                    <Button Grid.Column="0"
+                                            FontSize="18"
+                                            BackgroundColor="Transparent"
+                                            TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
+                                            Padding="0"
+                                            WidthRequest="28"
+                                            HeightRequest="28"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SourceSelectionViewModel}}, Path=ToggleItemSelectionCommand}"
+                                            CommandParameter="{Binding .}"
+                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SourceSelectionViewModel}}, Path=IsMultiSelectMode}">
+                                        <Button.Text>
+                                            <Binding Path="IsSelected"
+                                                     Converter="{StaticResource SelectionIconConverter}" />
+                                        </Button.Text>
+                                    </Button>
+
+                                    <!-- Folder/file icon -->
+                                    <Label Grid.Column="1"
+                                           FontSize="18"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}">
+                                        <Label.Text>
+                                            <Binding Path="IsDirectory"
+                                                     Converter="{StaticResource FileTypeIconConverter}" />
+                                        </Label.Text>
+                                    </Label>
+
+                                    <!-- Name (tap to navigate into folder) -->
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Name}"
+                                           FontSize="14"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <!-- Arrow indicator -->
+                                    <Label Grid.Column="3"
+                                           Text="&#x25B8;"
+                                           FontSize="12"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light=#999, Dark=#666}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <Label Text="No items found."
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light=#999, Dark=#666}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   Margin="0,40,0,0" />
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+
+                    <!-- Selection summary bar (visible when files are selected) -->
+                    <Border IsVisible="{Binding IsMultiSelectMode}"
+                            VerticalOptions="End"
+                            BackgroundColor="{AppThemeBinding Light=#E8F4FD, Dark=#1a3a5c}"
+                            Padding="16,10"
+                            StrokeThickness="0">
+                        <Grid ColumnDefinitions="*,Auto,Auto"
+                              ColumnSpacing="8">
+                            <Label Grid.Column="0"
+                                   Text="{Binding SelectedFilesSummary}"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#333, Dark=#EEE}"
+                                   VerticalOptions="Center" />
+                            <Button Grid.Column="1"
+                                    Text="Deselect All"
+                                    FontSize="11"
+                                    BackgroundColor="#555"
+                                    TextColor="White"
+                                    Padding="10,4"
+                                    CornerRadius="6"
+                                    Command="{Binding DeselectAllCommand}"
+                                    VerticalOptions="Center" />
+                            <Button Grid.Column="2"
+                                    Text="Transfer"
+                                    FontSize="11"
+                                    BackgroundColor="#512BD4"
+                                    TextColor="White"
+                                    Padding="12,4"
+                                    CornerRadius="6"
+                                    VerticalOptions="Center"
+                                    Clicked="OnTransferClicked" />
+                        </Grid>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

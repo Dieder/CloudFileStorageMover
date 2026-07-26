@@ -118,16 +118,29 @@ public partial class FileSelectionViewModel : ObservableObject
 
         foreach (var selectedFile in _selectedFiles.Files.ToList())
         {
-            var (localPath, remotePath, provider) = _selectedFiles.ResolveDownloadTarget(selectedFile);
+            var category = FileClassificationService.Classify(selectedFile.FileName);
+            var destDir = _destinationSettings.GetTransferDestination(category);
+            Directory.CreateDirectory(destDir);
+
+            var localPath = Path.Combine(destDir, selectedFile.FileName);
+            var counter = 1;
+            while (File.Exists(localPath))
+            {
+                var nameWithoutExt = Path.GetFileNameWithoutExtension(selectedFile.FileName);
+                var ext = Path.GetExtension(selectedFile.FileName);
+                localPath = Path.Combine(destDir, $"{nameWithoutExt} ({counter}){ext}");
+                counter++;
+            }
+
             pendingTransfers.Add(selectedFile.FileName);
 
             var job = new DownloadJob
             {
                 FileName = selectedFile.FileName,
-                RemotePath = remotePath,
+                RemotePath = selectedFile.RemotePath,
                 LocalPath = localPath,
                 TotalBytes = selectedFile.Size,
-                Provider = provider
+                Provider = _currentProvider
             };
 
             _downloadQueue.Enqueue(job);
@@ -180,31 +193,5 @@ public partial class FileSelectionViewModel : ObservableObject
         SelectedSummary = _selectedFiles.Count > 0
             ? $"{_selectedFiles.Count} file(s) selected ({_selectedFiles.TotalSize / 1024.0 / 1024.0:F1} MB)"
             : "No files selected";
-    }
-}
-
-public partial class SelectableFileItem : ObservableObject
-{
-    public FileItem FileItem { get; }
-
-    [ObservableProperty]
-    private bool _isSelected;
-
-    public string Name => FileItem.Name;
-    public string SizeText => FileItem.Size > 0
-        ? FileItem.Size / 1024.0 / 1024.0 > 1
-            ? $"{FileItem.Size / 1024.0 / 1024.0:F1} MB"
-            : $"{FileItem.Size / 1024.0:F0} KB"
-        : "";
-    public string Icon => IsSelected ? "☑" : "☐";
-
-    public SelectableFileItem(FileItem fileItem)
-    {
-        FileItem = fileItem;
-    }
-
-    partial void OnIsSelectedChanged(bool value)
-    {
-        OnPropertyChanged(nameof(Icon));
     }
 }

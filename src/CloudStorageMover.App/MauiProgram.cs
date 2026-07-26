@@ -47,9 +47,7 @@ public static class MauiProgram
         // Providers (fully qualified to use Core real implementations, not Controls stubs)
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.DesktopStorageProvider>();
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.GoogleDriveStorageProvider>();
-        builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.OneDriveStorageProvider>();
-        builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.MetaStorageProvider>();
-        builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.PrimeStorageProvider>();
+
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.MegaStorageProvider>();
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.PCloudStorageProvider>();
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.GooglePhotosStorageProvider>();
@@ -57,12 +55,15 @@ public static class MauiProgram
 
         // Auth services
         builder.Services.AddSingleton<CloudStorageMover.Core.Services.GoogleDriveSignInService>();
-        builder.Services.AddSingleton<CloudStorageMover.Core.Services.OneDriveSignInService>();
-        builder.Services.AddSingleton<CloudStorageMover.Core.Services.MetaSignInService>();
-        builder.Services.AddSingleton<CloudStorageMover.Core.Services.PrimeSignInService>();
+
         builder.Services.AddSingleton<CloudStorageMover.Core.Services.MegaSignInService>();
         builder.Services.AddSingleton<CloudStorageMover.Core.Services.PCloudSignInService>();
         builder.Services.AddSingleton<CloudStorageMover.Core.Services.GooglePhotosSignInService>();
+
+        // Azure Blob Storage services
+        builder.Services.AddSingleton<CloudStorageMover.Core.Services.BlobService>();
+        builder.Services.AddSingleton<CloudStorageMover.Core.Services.AlbumService>();
+        builder.Services.AddSingleton<CloudStorageMover.Core.Services.PhotoService>();
 
         // Download infrastructure
         builder.Services.AddSingleton<CloudStorageMover.Core.Services.DownloadManager>();
@@ -76,6 +77,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ConfigurationViewModel>();
         builder.Services.AddTransient<CloudStorageMover.App.ViewModels.PhotoGalleryViewModel>();
         builder.Services.AddTransient<CloudStorageMover.App.ViewModels.CameraImportViewModel>();
+        builder.Services.AddTransient<CloudStorageMover.App.ViewModels.MainViewModel>();
 
         // Pages
         builder.Services.AddTransient<MainPage>();
@@ -85,6 +87,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ConfigurationPage>();
         builder.Services.AddTransient<CloudStorageMover.App.Pages.PhotoGalleryPage>();
         builder.Services.AddTransient<CloudStorageMover.App.Pages.CameraImportPage>();
+        builder.Services.AddTransient<CloudStorageMover.App.Pages.AlbumManagerPage>();
 
         // App Services
         var destinationSettings = new DestinationSettingsService(FileSystem.AppDataDirectory);

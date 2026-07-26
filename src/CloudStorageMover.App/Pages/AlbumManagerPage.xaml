@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
+             xmlns:models="clr-namespace:CloudStorageMover.Core.Models"
+             x:Class="CloudStorageMover.App.Pages.AlbumManagerPage"
+             x:DataType="vm:MainViewModel"
+             Title="Photo Manager"
+             BackgroundColor="{AppThemeBinding Light=#f5f5f5, Dark=#1a1a1a}">
+
+    <Grid ColumnDefinitions="280,*"
+          ColumnSpacing="0">
+
+        <!-- LEFT: ALBUMS + SETTINGS -->
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto,Auto,*,Auto"
+              BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#222}"
+              Padding="0">
+
+            <!-- Connection Settings -->
+            <Border Grid.Row="0"
+                    Padding="12,10"
+                    BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Azure Connection"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" />
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="4">
+                        <Entry Grid.Column="0"
+                               Text="{Binding ConnectionString}"
+                               Placeholder="Connection string..."
+                               FontSize="11"
+                               IsPassword="{Binding IsConnectionStringVisible, Converter={StaticResource InvertBoolConverter}}"
+                               BackgroundColor="{AppThemeBinding Light=White, Dark=#333}"
+                               TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                               PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}" />
+                        <Button Grid.Column="1"
+                                Text="{Binding IsConnectionStringVisible, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Hide|Show'}"
+                                FontSize="10"
+                                Padding="6,0"
+                                BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
+                                Command="{Binding ToggleConnectionStringVisibilityCommand}" />
+                    </Grid>
+                    <Button Text="{Binding ConnectionStatus}"
+                            FontSize="11"
+                            Padding="0,6"
+                            BackgroundColor="#512BD4"
+                            TextColor="White"
+                            CornerRadius="4"
+                            Command="{Binding ConnectCommand}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Albums Header -->
+            <Grid Grid.Row="1"
+                  Padding="12,10"
+                  ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Albums"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="+"
+                        FontSize="16"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        Padding="0"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        CornerRadius="15"
+                        Command="{Binding CreateAlbumCommand}" />
+            </Grid>
+
+            <!-- Album List -->
+            <CollectionView Grid.Row="2"
+                            ItemsSource="{Binding Albums}"
+                            SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}"
+                            SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AlbumModel">
+                        <Border Padding="12,10"
+                                Margin="6,2"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#333}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+                                <VerticalStackLayout Grid.Column="0"
+                                                     VerticalOptions="Center"
+                                                     Spacing="2">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                                    <Label Text="{Binding PhotoCount, StringFormat='{0} photos'}"
+                                           FontSize="11"
+                                           TextColor="{AppThemeBinding Light=#888, Dark=#999}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1"
+                                        Text="..."
+                                        FontSize="12"
+                                        WidthRequest="28"
+                                        HeightRequest="28"
+                                        Padding="0"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{AppThemeBinding Light=#888, Dark=#999}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=ShowAlbumActionsCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Status Bar -->
+            <Label Grid.Row="3"
+                   Text="{Binding StatusMessage}"
+                   FontSize="11"
+                   Padding="12,8"
+                   TextColor="{AppThemeBinding Light=#666, Dark=#999}"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="2" />
+        </Grid>
+
+        <!-- RIGHT: PHOTOS -->
+        <Grid Grid.Column="1"
+              RowDefinitions="Auto,Auto,*">
+
+            <!-- Toolbar -->
+            <Grid Grid.Row="0"
+                  Padding="12,10"
+                  BackgroundColor="{AppThemeBinding Light=White, Dark=#2a2a2a}"
+                  ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto"
+                  ColumnSpacing="8">
+                <Button Grid.Column="0"
+                        Text="Upload"
+                        BackgroundColor="#27ae60"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="10,6"
+                        CornerRadius="6"
+                        Command="{Binding UploadPhotoCommand}"
+                        IsEnabled="{Binding HasAlbum}" />
+                <Button Grid.Column="1"
+                        Text="Download"
+                        BackgroundColor="#3498db"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="10,6"
+                        CornerRadius="6"
+                        Command="{Binding DownloadSelectedCommand}"
+                        IsEnabled="{Binding HasSelection}" />
+                <Button Grid.Column="2"
+                        Text="Delete"
+                        BackgroundColor="#e74c3c"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="10,6"
+                        CornerRadius="6"
+                        Command="{Binding DeleteSelectedCommand}"
+                        IsEnabled="{Binding HasSelection}" />
+                <Button Grid.Column="3"
+                        Text="{Binding IsMultiSelectMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Done|Multi-Select'}"
+                        BackgroundColor="{Binding IsMultiSelectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#555'}"
+                        TextColor="White"
+                        FontSize="12"
+                        Padding="10,6"
+                        CornerRadius="6"
+                        Command="{Binding ToggleMultiSelectCommand}"
+                        IsEnabled="{Binding HasAlbum}" />
+                <Label Grid.Column="5"
+                       Text="{Binding SelectedAlbum.Name}"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End" />
+            </Grid>
+
+            <!-- Empty state / Loading -->
+            <VerticalStackLayout Grid.Row="1"
+                                 Padding="20"
+                                 IsVisible="{Binding IsLoading}"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Spacing="10">
+                <ActivityIndicator IsRunning="True"
+                                   Color="#512BD4"
+                                   HorizontalOptions="Center" />
+                <Label Text="Loading..."
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#888, Dark=#999}"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Photo Grid -->
+            <CollectionView Grid.Row="2"
+                            ItemsSource="{Binding Photos}"
+                            SelectionMode="{Binding IsMultiSelectMode, Converter={StaticResource MultiSelectConverter}}"
+                            SelectedItems="{Binding SelectedPhotos}"
+                            Margin="8">
+                <CollectionView.EmptyView>
+                    <Label Text="No photos in this album. Upload some!"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#999}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Margin="20" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="4"
+                                     VerticalItemSpacing="8"
+                                     HorizontalItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:PhotoItem">
+                        <Border Padding="4"
+                                Stroke="{AppThemeBinding Light=#ddd, Dark=#444}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#333}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="4">
+                                <Image Source="{Binding FullUrl}"
+                                       Aspect="AspectFill"
+                                       HeightRequest="120"
+                                       BackgroundColor="{AppThemeBinding Light=#eee, Dark=#444}" />
+                                <Label Text="{Binding BlobName}"
+                                       FontSize="10"
+                                       LineBreakMode="TailTruncation"
+                                       MaxLines="1"
+                                       TextColor="{AppThemeBinding Light=#333, Dark=#ccc}" />
+                                <Label Text="{Binding SizeText}"
+                                       FontSize="9"
+                                       TextColor="{AppThemeBinding Light=#888, Dark=#999}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
+</ContentPage>

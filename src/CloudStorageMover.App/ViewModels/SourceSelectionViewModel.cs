@@ -14,6 +14,7 @@ public partial class SourceSelectionViewModel : ObservableObject
 {
     private readonly StorageProviderFactory _providerFactory;
     private readonly AppSettingsService _settings;
+    private readonly SelectedFilesService _selectedFiles;
     private readonly ILogger<SourceSelectionViewModel> _logger;
     private IStorageProviderService? _selectedProvider;
     private List<ProviderItem> _allProviders = [];
@@ -22,12 +23,11 @@ public partial class SourceSelectionViewModel : ObservableObject
 
     // Auth services
     private readonly GoogleDriveSignInService _googleDriveAuth;
-    private readonly OneDriveSignInService _oneDriveAuth;
-    private readonly MetaSignInService _metaAuth;
-    private readonly PrimeSignInService _primeAuth;
+
     private readonly MegaSignInService _megaAuth;
     private readonly PCloudSignInService _pcloudAuth;
     private readonly GooglePhotosSignInService _googlePhotosAuth;
+    private readonly DestinationSettingsService _destinationSettings;
 
     [ObservableProperty]
     private ProviderItem? _selectedProviderItem;
@@ -65,6 +65,15 @@ public partial class SourceSelectionViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoadingFiles;
 
+    [ObservableProperty]
+    private bool _isMultiSelectMode;
+
+    [ObservableProperty]
+    private int _selectedFilesCount;
+
+    [ObservableProperty]
+    private string _selectedFilesSummary = string.Empty;
+
     partial void OnIsBrowsingFilesChanged(bool value)
     {
         IsSourceVisible = !value;
@@ -75,9 +84,9 @@ public partial class SourceSelectionViewModel : ObservableObject
 
     public ObservableCollection<ProviderItem> Providers { get; } = [];
     public ObservableCollection<ProviderItem> FilteredProviders { get; } = [];
-    public ObservableCollection<FileItem> DisplayItems { get; } = [];
+    public ObservableCollection<SelectableFileItem> DisplayItems { get; } = [];
 
-    private List<FileItem> _allDisplayItems = [];
+    private List<SelectableFileItem> _allDisplayItems = [];
     private readonly Stack<string> _pathStack = [];
 
     public IStorageProviderService? SelectedProvider => _selectedProvider;
@@ -88,26 +97,26 @@ public partial class SourceSelectionViewModel : ObservableObject
     public SourceSelectionViewModel(
         StorageProviderFactory providerFactory,
         AppSettingsService settings,
+        SelectedFilesService selectedFiles,
         IOAuthLoopbackService oauthLoopback,
         GoogleDriveSignInService googleDriveAuth,
-        OneDriveSignInService oneDriveAuth,
-        MetaSignInService metaAuth,
-        PrimeSignInService primeAuth,
+
         MegaSignInService megaAuth,
         PCloudSignInService pcloudAuth,
         GooglePhotosSignInService googlePhotosAuth,
+        DestinationSettingsService destinationSettings,
         ILogger<SourceSelectionViewModel> logger)
     {
         _providerFactory = providerFactory;
         _settings = settings;
+        _selectedFiles = selectedFiles;
         _oauthLoopback = oauthLoopback;
         _googleDriveAuth = googleDriveAuth;
-        _oneDriveAuth = oneDriveAuth;
-        _metaAuth = metaAuth;
-        _primeAuth = primeAuth;
+
         _megaAuth = megaAuth;
         _pcloudAuth = pcloudAuth;
         _googlePhotosAuth = googlePhotosAuth;
+        _destinationSettings = destinationSettings;
         _logger = logger;
 
         var allProviders = providerFactory.GetAllProviders();
@@ -151,6 +160,8 @@ public partial class SourceSelectionViewModel : ObservableObject
         SignInStatus = string.Empty;
         DisplayItems.Clear();
         CurrentPath = string.Empty;
+        IsMultiSelectMode = false;
+        UpdateSelectionCount();
     }
 
     partial void OnSelectedProviderItemChanged(ProviderItem? value)
@@ -170,6 +181,108 @@ public partial class SourceSelectionViewModel : ObservableObject
         {
             SignInStatus = string.Empty;
         }
+    }
+
+    [RelayCommand]
+    private void ToggleMultiSelect()
+    {
+        IsMultiSelectMode = !IsMultiSelectMode;
+        if (!IsMultiSelectMode)
+        {
+            ClearAllSelections();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAllVisible()
+    {
+        foreach (var item in DisplayItems)
+        {
+            if (!item.IsDirectory && !item.IsSelected)
+            {
+                item.IsSelected = true;
+                _selectedFiles.AddFile(item.FileItem, item.FileItem.FullPath);
+            }
+        }
+        UpdateSelectionCount();
+    }
+
+    [RelayCommand]
+    private void DeselectAll()
+    {
+        _selectedFiles.Clear();
+        UpdateSelectionCount();
+    }
+
+    private void ClearAllSelections()
+    {
+        foreach (var item in DisplayItems)
+            item.IsSelected = false;
+        foreach (var item in _allDisplayItems)
+            item.IsSelected = false;
+        _selectedFiles.Clear();
+        UpdateSelectionCount();
+    }
+
+    [RelayCommand]
+    private void ToggleItemSelection(SelectableFileItem item)
+    {
+        if (item.IsDirectory)
+        {
+            _ = SelectFolderRecursiveAsync(item.FileItem);
+        }
+        else
+        {
+            if (item.IsSelected)
+            {
+                item.IsSelected = false;
+                _selectedFiles.RemoveFile(item.FileItem.FullPath);
+            }
+            else
+            {
+                item.IsSelected = true;
+                _selectedFiles.AddFile(item.FileItem, item.FileItem.FullPath);
+            }
+        }
+        UpdateSelectionCount();
+    }
+
+    public async Task SelectFolderRecursiveAsync(FileItem folder)
+    {
+        if (_selectedProvider == null) return;
+
+        try
+        {
+            IsLoadingFiles = true;
+            var files = await _selectedProvider.ListFilesAsync(folder.FullPath);
+            foreach (var file in files)
+            {
+                _selectedFiles.AddFile(file, file.FullPath);
+            }
+
+            var subFolders = await _selectedProvider.ListFoldersAsync(folder.FullPath);
+            foreach (var subFolder in subFolders)
+            {
+                await SelectFolderRecursiveAsync(subFolder);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to recursively select folder {Path}", folder.FullPath);
+        }
+        finally
+        {
+            IsLoadingFiles = false;
+            UpdateSelectionCount();
+        }
+    }
+
+    private void UpdateSelectionCount()
+    {
+        SelectedFilesCount = _selectedFiles.Count;
+        SelectedFilesSummary = _selectedFiles.Count > 0
+            ? $"{_selectedFiles.Count} file(s) selected ({_selectedFiles.TotalSize / 1024.0 / 1024.0:F1} MB)"
+            : "No files selected";
     }
 
     [RelayCommand]
@@ -341,46 +454,8 @@ public partial class SourceSelectionViewModel : ObservableObject
                     "https://www.googleapis.com/auth/drive.readonly",
                     (token, refresh, exp) => _googleDriveAuth.SetTokens(token, refresh, exp));
 
-            case StorageProviderType.OneDrive:
-                await _oneDriveAuth.SignInAsync();
-                return _oneDriveAuth.IsSignedIn;
-
-            case StorageProviderType.Meta:
-                {
-                    var metaToken = await Shell.Current.DisplayPromptAsync("Meta Login",
-                        "Enter your Meta access token:", "Sign In", "Cancel",
-                        placeholder: "EAAC...");
-                    if (!string.IsNullOrEmpty(metaToken))
-                    {
-                        var expiresIn = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
-                        _metaAuth.SetTokens(metaToken, expiresIn);
-                        var success = _metaAuth.IsSignedIn;
-                        if (success)
-                        {
-                            await Shell.Current.DisplayAlert("Meta Login", "Signed in successfully.", "OK");
-                        }
-                        else
-                        {
-                            await Shell.Current.DisplayAlert("Meta Login", "Sign-in failed. The token may be invalid or expired.", "OK");
-                        }
-                        return success;
-                    }
-                    return false;
-                }
-
-            case StorageProviderType.Prime:
-                var primeToken = await Shell.Current.DisplayPromptAsync("Prime Login",
-                    "Enter your Prime access token:", "Sign In", "Cancel",
-                    placeholder: "prime_...");
-                if (!string.IsNullOrEmpty(primeToken))
-                {
-                    _primeAuth.SetTokens(primeToken, primeToken, 3600);
-                    return true;
-                }
-                return false;
-
             case StorageProviderType.Mega:
-                var megaKey = _settings.MegaKey;
+                var megaKey = _destinationSettings.MegaKey;
                 if (!string.IsNullOrEmpty(megaKey) && _megaAuth.TryRestoreFromKey(megaKey))
                     return true;
 
@@ -450,15 +525,6 @@ public partial class SourceSelectionViewModel : ObservableObject
             case StorageProviderType.GoogleDrive:
                 _ = _googleDriveAuth.SignOutAsync();
                 break;
-            case StorageProviderType.OneDrive:
-                _ = _oneDriveAuth.SignOutAsync();
-                break;
-            case StorageProviderType.Meta:
-                _ = _metaAuth.SignOutAsync();
-                break;
-            case StorageProviderType.Prime:
-                _ = _primeAuth.SignOutAsync();
-                break;
             case StorageProviderType.Mega:
                 _ = _megaAuth.SignOutAsync();
                 break;
@@ -479,9 +545,6 @@ public partial class SourceSelectionViewModel : ObservableObject
         {
             StorageProviderType.Desktop => true,
             StorageProviderType.GoogleDrive => _googleDriveAuth.IsSignedIn,
-            StorageProviderType.OneDrive => _oneDriveAuth.IsSignedIn,
-            StorageProviderType.Meta => _metaAuth.IsSignedIn,
-            StorageProviderType.Prime => _primeAuth.IsSignedIn,
             StorageProviderType.Mega => _megaAuth.IsSignedIn,
             StorageProviderType.PCloud => _pcloudAuth.IsSignedIn,
             StorageProviderType.GooglePhotos => _googlePhotosAuth.IsSignedIn || _googlePhotosAuth.HasRefreshToken,
@@ -554,7 +617,7 @@ public partial class SourceSelectionViewModel : ObservableObject
 
             _pathStack.Clear();
             CurrentPath = _selectedProvider.DisplayName;
-            _allDisplayItems = folderItems;
+            _allDisplayItems = folderItems.Select(f => new SelectableFileItem(f)).ToList();
             IsBrowsingFiles = true;
             ApplyFileFilter();
             FoldersLoaded?.Invoke(this, folderItems);
@@ -596,7 +659,7 @@ public partial class SourceSelectionViewModel : ObservableObject
             items.AddRange(subFolders);
             items.AddRange(files);
 
-            _allDisplayItems = items;
+            _allDisplayItems = items.Select(f => new SelectableFileItem(f)).ToList();
             ApplyFileFilter();
         }
         catch (Exception ex)

@@ -10,6 +10,7 @@ public partial class SourceSelectionPage : ContentView
 
     public event EventHandler<List<FileItem>>? FoldersLoaded;
     public event EventHandler<StorageProviderType>? ProviderChanging;
+    public event EventHandler? TransferRequested;
 
     public SourceSelectionPage(SourceSelectionViewModel viewModel)
     {
@@ -31,14 +32,25 @@ public partial class SourceSelectionPage : ContentView
         ProviderChanging?.Invoke(this, providerType);
     }
 
-    private void OnFileSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void OnItemTapped(object? sender, TappedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is FileItem item && item.IsDirectory)
+        if (e.Parameter is not SelectableFileItem item)
+            return;
+
+        if (_viewModel.IsMultiSelectMode)
         {
-            _ = _viewModel.OpenFolderCommand.ExecuteAsync(item);
+            _viewModel.ToggleItemSelectionCommand.Execute(item);
+            return;
         }
 
-        if (sender is CollectionView cv)
-            cv.SelectedItem = null;
+        if (item.IsDirectory)
+        {
+            _ = _viewModel.OpenFolderCommand.ExecuteAsync(item.FileItem);
+        }
+    }
+
+    private void OnTransferClicked(object? sender, EventArgs e)
+    {
+        TransferRequested?.Invoke(this, EventArgs.Empty);
     }
 }
