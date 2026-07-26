@@ -17,6 +17,7 @@ public partial class MainPage : ContentPage
     private readonly ConfigurationPage _configPage;
     private readonly PhotoGalleryPage _galleryPage;
     private readonly CameraImportPage _cameraImportPage;
+    private readonly AlbumManagerPage _albumManagerPage;
     private readonly SelectedFilesService _selectedFiles;
     private readonly GooglePhotosPickerService _photosPicker;
     private readonly DestinationSettingsService _destinationSettings;
@@ -28,6 +29,7 @@ public partial class MainPage : ContentPage
                     ConfigurationPage configPage,
                     PhotoGalleryPage galleryPage,
                     CameraImportPage cameraImportPage,
+                    AlbumManagerPage albumManagerPage,
                     SelectedFilesService selectedFiles,
                     GooglePhotosPickerService photosPicker,
                     DestinationSettingsService destinationSettings)
@@ -40,6 +42,7 @@ public partial class MainPage : ContentPage
         _configPage = configPage;
         _galleryPage = galleryPage;
         _cameraImportPage = cameraImportPage;
+        _albumManagerPage = albumManagerPage;
         _selectedFiles = selectedFiles;
         _photosPicker = photosPicker;
         _destinationSettings = destinationSettings;
@@ -49,6 +52,7 @@ public partial class MainPage : ContentPage
         MenuBar.QuitRequested += OnQuitRequested;
         MenuBar.PhotosPickerRequested += OnPhotosPickerRequested;
         MenuBar.GalleryRequested += OnGalleryRequested;
+        MenuBar.AzurePhotosRequested += OnAzurePhotosRequested;
         MenuBar.CameraImportRequested += OnCameraImportRequested;
         _sourcePage.FoldersLoaded += OnSourceFoldersLoaded;
         _sourcePage.ProviderChanging += OnProviderChanging;
@@ -68,6 +72,15 @@ public partial class MainPage : ContentPage
 
         if (e == AppMenuItem.Configuration && ConfigArea.Content == null)
             ConfigArea.Content = _configPage;
+
+        if (e != AppMenuItem.Configuration && ConfigArea.Content is ConfigurationPage configPage)
+        {
+            if (configPage.BindingContext is ConfigurationViewModel vm)
+            {
+                vm.IsAzureConnectionStringVisible = false;
+                vm.IsMegaKeyVisible = false;
+            }
+        }
 
         if (e == AppMenuItem.Transfer)
         {
@@ -137,6 +150,14 @@ public partial class MainPage : ContentPage
         _viewModel.NavigateTo(AppMenuItem.Source);
     }
 
+    private void OnAzurePhotosRequested(object? sender, EventArgs e)
+    {
+        if (AzurePhotosArea.Content == null)
+            AzurePhotosArea.Content = _albumManagerPage;
+
+        _viewModel.ShowAzurePhotos();
+    }
+
     private void OnCameraImportBackRequested(object? sender, EventArgs e)
     {
         _viewModel.HideCameraImport();
@@ -148,12 +169,14 @@ public partial class MainPage : ContentPage
         _viewModel.NavigateTo(AppMenuItem.Source);
     }
 
-    private void OnGalleryRequested(object? sender, EventArgs e)
+    private async void OnGalleryRequested(object? sender, EventArgs e)
     {
         var downloadFolder = _destinationSettings.GooglePhotosDownloadPath;
         if (string.IsNullOrEmpty(downloadFolder) || !Directory.Exists(downloadFolder))
         {
-            _viewModel.NavigateTo(AppMenuItem.Source);
+            await DisplayAlert("Photo Gallery",
+                "No Google Photos download folder configured.\n\nGo to Configuration (gear icon) to set the download folder path.",
+                "OK");
             return;
         }
 

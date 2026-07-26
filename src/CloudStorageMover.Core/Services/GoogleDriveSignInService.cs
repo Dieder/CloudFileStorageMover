@@ -65,7 +65,7 @@ namespace CloudStorageMover.Core.Services
             OnEmailChanged(null);
         }
 
-        public async Task<string> ListFilesAsync(string folderId = null)
+        public async Task<string> ListFilesAsync(string? folderId = null)
         {
             if (!IsSignedIn)
             {
@@ -139,10 +139,11 @@ namespace CloudStorageMover.Core.Services
                 throw new Exception($"Error refreshing token: {responseBody}");
             }
 
-            var jsonTokens = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
-            var accessToken = jsonTokens["access_token"].ToString();
-            var refreshTokenNew = jsonTokens.ContainsKey("refresh_token") ? jsonTokens["refresh_token"].ToString() : refreshToken;
-            var expiresIn = int.Parse(jsonTokens["expires_in"].ToString());
+            using var doc = System.Text.Json.JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
+            var accessToken = root.GetProperty("access_token").GetString();
+            var refreshTokenNew = root.TryGetProperty("refresh_token", out var rt) ? rt.GetString() : refreshToken;
+            var expiresIn = root.TryGetProperty("expires_in", out var exp) ? exp.GetInt32() : 3600;
 
             await SetSecureValueAsync(AccessTokenKey, accessToken);
             await SetSecureValueAsync(RefreshTokenKey, refreshTokenNew);

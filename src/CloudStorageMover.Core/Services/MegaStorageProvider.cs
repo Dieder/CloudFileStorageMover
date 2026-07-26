@@ -26,8 +26,9 @@ public class MegaStorageProvider : IStorageProviderService
         if (parent == null)
             return new List<FileItem>();
 
-        var childNodes = (await client.GetNodesAsync(parent))
-            .Where(n => n.Type == NodeType.Directory);
+        var allNodes = await client.GetNodesAsync();
+        var childNodes = allNodes
+            .Where(n => n.Type == NodeType.Directory && n.ParentId == parent.Id);
 
         return childNodes.Select(n => new FileItem
         {
@@ -48,8 +49,9 @@ public class MegaStorageProvider : IStorageProviderService
         if (parent == null)
             return new List<FileItem>();
 
-        var childNodes = (await client.GetNodesAsync(parent))
-            .Where(n => n.Type == NodeType.File);
+        var allNodes = await client.GetNodesAsync();
+        var childNodes = allNodes
+            .Where(n => n.Type == NodeType.File && n.ParentId == parent.Id);
 
         return childNodes.Select(n => new FileItem
         {
@@ -82,8 +84,7 @@ public class MegaStorageProvider : IStorageProviderService
             throw new InvalidOperationException("User must be signed in to open a file stream.");
 
         var client = _authService.GetClient();
-        var allNodes = await client.GetNodesAsync();
-        var node = FindNodeByPath(allNodes, remotePath);
+        var node = await ResolveNodeAsync(client, remotePath);
         if (node == null || node.Type != NodeType.File)
             throw new InvalidOperationException("File not found.");
 
@@ -142,8 +143,7 @@ public class MegaStorageProvider : IStorageProviderService
             throw new InvalidOperationException("User must be signed in to download files.");
 
         var client = _authService.GetClient();
-        var allNodes = await client.GetNodesAsync();
-        var node = FindNodeByPath(allNodes, remotePath);
+        var node = await ResolveNodeAsync(client, remotePath);
         if (node == null || node.Type != NodeType.File)
             throw new InvalidOperationException("File not found.");
 
@@ -180,8 +180,7 @@ public class MegaStorageProvider : IStorageProviderService
             throw new InvalidOperationException("User must be signed in to delete files.");
 
         var client = _authService.GetClient();
-        var allNodes = await client.GetNodesAsync();
-        var node = FindNodeByPath(allNodes, path);
+        var node = await ResolveNodeAsync(client, path);
         if (node == null)
             throw new InvalidOperationException("Item not found.");
 

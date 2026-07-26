@@ -199,7 +199,7 @@ namespace CloudStorageMover.Core.Services
                 query += " and mimeType!='application/vnd.google-apps.folder'";
             }
 
-            var requestUrl = $"https://www.googleapis.com/drive/v3/files?q={Uri.EscapeDataString(query)}&fields=files(id,name,mimeType)";
+            var requestUrl = $"https://www.googleapis.com/drive/v3/files?q={Uri.EscapeDataString(query)}&fields=files(id,name,mimeType,size)";
             var response = await client.GetAsync(requestUrl, ct);
             response.EnsureSuccessStatusCode();
 
@@ -213,8 +213,9 @@ namespace CloudStorageMover.Core.Services
                 {
                     fileItems.Add(new FileItem
                     {
-                        Name = file.Name,
-                        FullPath = file.Id,
+                        Name = file.Name ?? "Unknown",
+                        FullPath = file.Id ?? string.Empty,
+                        Size = file.Size ?? 0,
                         IsDirectory = file.MimeType == "application/vnd.google-apps.folder",
                         ProviderType = ProviderType
                     });
@@ -228,11 +229,14 @@ namespace CloudStorageMover.Core.Services
     public class GoogleDriveFileResponse
     {
         [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
+        public string? Id { get; set; }
         [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+        public string? Name { get; set; }
         [JsonPropertyName("mimeType")]
-        public string MimeType { get; set; } = string.Empty;
+        public string? MimeType { get; set; }
+        [JsonPropertyName("size")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+        public long? Size { get; set; }
     }
 
     public class GoogleDriveListResponse

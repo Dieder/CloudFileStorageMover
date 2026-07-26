@@ -7,7 +7,7 @@
              BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
     <ScrollView>
         <Grid Padding="30"
-              RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
               RowSpacing="20">
 
             <Label Grid.Row="0"
@@ -169,6 +169,102 @@
                    Text="Files will be downloaded to the destination folder. If a file already exists, a number suffix will be added."
                    FontSize="13"
                    TextColor="{AppThemeBinding Light=#999, Dark=#666}" />
+
+            <!-- Azure Blob Storage Connection -->
+            <Border Grid.Row="4"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#333}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Grid RowDefinitions="Auto,Auto"
+                      RowSpacing="12">
+
+                    <Label Grid.Row="0"
+                           Text="Azure Blob Storage Connection"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,Auto"
+                          ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Stroke="{AppThemeBinding Light=#ccc, Dark=#444}"
+                                StrokeThickness="1"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding AzureConnectionString, Mode=TwoWay}"
+                                   Placeholder="DefaultEndpointsProtocol=https;AccountName=..."
+                                   FontSize="14"
+                                   BackgroundColor="Transparent"
+                                   IsPassword="{Binding IsAzureConnectionStringVisible, Converter={StaticResource InvertBoolConverter}}" />
+                        </Border>
+
+                        <Button Grid.Column="1"
+                                Text="{Binding IsAzureConnectionStringVisible, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Hide|Show'}"
+                                FontSize="12"
+                                Padding="16,10"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding ToggleAzureConnectionStringVisibilityCommand}" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- MEGA API Key -->
+            <Border Grid.Row="5"
+                    Stroke="{AppThemeBinding Light=#ddd, Dark=#333}"
+                    StrokeThickness="1"
+                    Padding="20"
+                    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#2a2a2a}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Grid RowDefinitions="Auto,Auto"
+                      RowSpacing="12">
+
+                    <Label Grid.Row="0"
+                           Text="MEGA Login Key"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#EEE}" />
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,Auto"
+                          ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Stroke="{AppThemeBinding Light=#ccc, Dark=#444}"
+                                StrokeThickness="1"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1f1f1f}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding MegaKey, Mode=TwoWay}"
+                                   Placeholder="Paste your MEGA login key..."
+                                   FontSize="14"
+                                   BackgroundColor="Transparent"
+                                   IsPassword="{Binding IsMegaKeyVisible, Converter={StaticResource InvertBoolConverter}}" />
+                        </Border>
+
+                        <Button Grid.Column="1"
+                                Text="{Binding IsMegaKeyVisible, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Hide|Show'}"
+                                FontSize="12"
+                                Padding="16,10"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding ToggleMegaKeyVisibilityCommand}" />
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </ScrollView>
 </ContentView>

@@ -557,6 +557,7 @@ public partial class SourceSelectionViewModel : ObservableObject
         _selectedProvider = _providerFactory.GetProvider(type);
         SelectedProviderName = _selectedProvider.DisplayName;
         IsProviderSelected = true;
+        _selectedFiles.SetProvider(_selectedProvider);
 
         if (type == StorageProviderType.GooglePhotos)
         {

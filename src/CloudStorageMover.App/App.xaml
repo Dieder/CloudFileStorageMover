@@ -18,6 +18,9 @@
                                                FalseValue="Local" />
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:MultiSelectConverter x:Key="MultiSelectConverter" />
+            <converters:YearToColorConverter x:Key="YearToColorConverter" />
+            <converters:YearToTextColorConverter x:Key="YearToTextColorConverter" />
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,57 +1,42 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:CloudStorageMover.App.ViewModels"
              xmlns:models="clr-namespace:CloudStorageMover.Core.Models"
+             xmlns:converters="clr-namespace:CloudStorageMover.App.Converters"
              x:Class="CloudStorageMover.App.Pages.AlbumManagerPage"
              x:DataType="vm:MainViewModel"
-             Title="Photo Manager"
              BackgroundColor="{AppThemeBinding Light=#f5f5f5, Dark=#1a1a1a}">
 
-    <Grid ColumnDefinitions="280,*"
+    <Grid ColumnDefinitions="280,*,260"
           ColumnSpacing="0">
 
-        <!-- LEFT: ALBUMS + SETTINGS -->
+        <!-- LEFT: ALBUMS + FILTERS -->
         <Grid Grid.Column="0"
-              RowDefinitions="Auto,Auto,*,Auto"
-              BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#222}"
-              Padding="0">
+              RowDefinitions="Auto,Auto,*,Auto,Auto"
+              BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#222}">
 
-            <!-- Connection Settings -->
+            <!-- Connection Status -->
             <Border Grid.Row="0"
                     Padding="12,10"
                     BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="Azure Connection"
-                           FontSize="11"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" />
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="4">
-                        <Entry Grid.Column="0"
-                               Text="{Binding ConnectionString}"
-                               Placeholder="Connection string..."
-                               FontSize="11"
-                               IsPassword="{Binding IsConnectionStringVisible, Converter={StaticResource InvertBoolConverter}}"
-                               BackgroundColor="{AppThemeBinding Light=White, Dark=#333}"
-                               TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
-                               PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}" />
-                        <Button Grid.Column="1"
-                                Text="{Binding IsConnectionStringVisible, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Hide|Show'}"
-                                FontSize="10"
-                                Padding="6,0"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
-                                Command="{Binding ToggleConnectionStringVisibilityCommand}" />
-                    </Grid>
-                    <Button Text="{Binding ConnectionStatus}"
-                            FontSize="11"
-                            Padding="0,6"
-                            BackgroundColor="#512BD4"
-                            TextColor="White"
-                            CornerRadius="4"
+                <Grid ColumnDefinitions="*,Auto"
+                      ColumnSpacing="8">
+                    <Label Grid.Column="0"
+                           Text="{Binding ConnectionStatus}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                           VerticalOptions="Center" />
+                    <Button Grid.Column="1"
+                            Text="&#x21bb;"
+                            FontSize="14"
+                            WidthRequest="28"
+                            HeightRequest="28"
+                            Padding="0"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
                             Command="{Binding ConnectCommand}" />
-                </VerticalStackLayout>
+                </Grid>
             </Border>
 
             <!-- Albums Header -->
@@ -73,14 +58,115 @@
                         BackgroundColor="#512BD4"
                         TextColor="White"
                         CornerRadius="15"
-                        Command="{Binding CreateAlbumCommand}" />
+                        Command="{Binding ShowCreateAlbumCommand}" />
             </Grid>
+
+            <!-- Create Album Panel -->
+            <Border Grid.Row="2"
+                    IsVisible="{Binding IsCreateMode}"
+                    Padding="12,10"
+                    BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="New Album"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                    <Entry Text="{Binding NewAlbumName}"
+                           Placeholder="Album name..."
+                           FontSize="13"
+                           BackgroundColor="{AppThemeBinding Light=White, Dark=#333}"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                           PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}" />
+                    <HorizontalStackLayout Spacing="8">
+                        <RadioButton Content="New container"
+                                     IsChecked="{Binding IsNewContainer}"
+                                     FontSize="12"
+                                     TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                        <RadioButton Content="Existing container"
+                                     IsChecked="{Binding IsNewContainer, Converter={StaticResource InvertBoolConverter}}"
+                                     FontSize="12"
+                                     TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                    </HorizontalStackLayout>
+                    <Picker ItemsSource="{Binding AvailableContainers}"
+                            SelectedItem="{Binding SelectedExistingContainer}"
+                            IsVisible="{Binding IsNewContainer, Converter={StaticResource InvertBoolConverter}}"
+                            FontSize="12"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#333}"
+                            TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="6">
+                        <Button Grid.Column="0"
+                                Text="Create"
+                                FontSize="12"
+                                Padding="0,8"
+                                BackgroundColor="#27ae60"
+                                TextColor="White"
+                                CornerRadius="6"
+                                Command="{Binding CreateAlbumCommand}" />
+                        <Button Grid.Column="1"
+                                Text="Cancel"
+                                FontSize="12"
+                                Padding="0,8"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="6"
+                                Command="{Binding CancelCreateAlbumCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Rename Album Panel -->
+            <Border Grid.Row="2"
+                    IsVisible="{Binding IsRenameMode}"
+                    Padding="12,10"
+                    BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Rename Album"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+                    <Entry Text="{Binding RenameAlbumName}"
+                           Placeholder="New name..."
+                           FontSize="13"
+                           BackgroundColor="{AppThemeBinding Light=White, Dark=#333}"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                           PlaceholderColor="{AppThemeBinding Light=#999, Dark=#666}" />
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="6">
+                        <Button Grid.Column="0"
+                                Text="Rename"
+                                FontSize="12"
+                                Padding="0,8"
+                                BackgroundColor="#512BD4"
+                                TextColor="White"
+                                CornerRadius="6"
+                                Command="{Binding ConfirmRenameAlbumCommand}" />
+                        <Button Grid.Column="1"
+                                Text="Cancel"
+                                FontSize="12"
+                                Padding="0,8"
+                                BackgroundColor="#555"
+                                TextColor="White"
+                                CornerRadius="6"
+                                Command="{Binding CancelRenameAlbumCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Album List -->
             <CollectionView Grid.Row="2"
                             ItemsSource="{Binding Albums}"
                             SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}"
-                            SelectionMode="Single">
+                            SelectionMode="Single"
+                            IsVisible="{Binding IsCreateMode, Converter={StaticResource InvertBoolConverter}}">
+                <CollectionView.EmptyView>
+                    <Label Text="No albums registered. Tap + to create one."
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#999}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Margin="20" />
+                </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:AlbumModel">
                         <Border Padding="12,10"
@@ -99,7 +185,7 @@
                                            FontSize="14"
                                            FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
-                                    <Label Text="{Binding PhotoCount, StringFormat='{0} photos'}"
+                                    <Label Text="{Binding PhotoCount, StringFormat='{0} files'}"
                                            FontSize="11"
                                            TextColor="{AppThemeBinding Light=#888, Dark=#999}" />
                                 </VerticalStackLayout>
@@ -119,8 +205,164 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
+            <!-- Filters -->
+            <Border Grid.Row="3"
+                    IsVisible="{Binding HasAlbum}"
+                    Padding="12,10"
+                    BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Filters"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+
+                    <!-- Media Type Filters -->
+                    <Grid ColumnDefinitions="*,*"
+                          ColumnSpacing="6">
+                        <Border Grid.Column="0"
+                                Padding="8,6"
+                                StrokeShape="RoundRectangle 4"
+                                BackgroundColor="{Binding IsFilterPhoto, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#e0e0e0'}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleFilterPhotoCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="📷 Photo"
+                                   FontSize="12"
+                                   HorizontalOptions="Center"
+                                   TextColor="{Binding IsFilterPhoto, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#333'}" />
+                        </Border>
+                        <Border Grid.Column="1"
+                                Padding="8,6"
+                                StrokeShape="RoundRectangle 4"
+                                BackgroundColor="{Binding IsFilterVideo, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#e0e0e0'}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleFilterVideoCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="🎬 Video"
+                                   FontSize="12"
+                                   HorizontalOptions="Center"
+                                   TextColor="{Binding IsFilterVideo, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#333'}" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Year Filter Header -->
+                    <Border Padding="0"
+                            StrokeShape="RoundRectangle 4"
+                            BackgroundColor="Transparent">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleYearFilterCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="4">
+                            <Label Grid.Column="0"
+                                   Text="Year"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#333, Dark=#eee}"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding IsYearFilterExpanded, Converter={StaticResource BoolToStringConverter}, ConverterParameter='▼|▶'}"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Year Buttons -->
+                    <Border IsVisible="{Binding IsYearFilterExpanded}"
+                            Padding="0"
+                            StrokeShape="RoundRectangle 4"
+                            BackgroundColor="Transparent">
+                        <VerticalStackLayout Spacing="4">
+                            <!-- All years -->
+                            <Border Padding="8,5"
+                                    StrokeShape="RoundRectangle 4"
+                                    BackgroundColor="{Binding SelectedYear, Converter={StaticResource YearToColorConverter}, ConverterParameter=0}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetYearFilterCommand}" CommandParameter="0" />
+                                </Border.GestureRecognizers>
+                                <Label Text="All years"
+                                       FontSize="12"
+                                       TextColor="{Binding SelectedYear, Converter={StaticResource YearToTextColorConverter}, ConverterParameter=0}" />
+                            </Border>
+
+                            <CollectionView ItemsSource="{Binding RecentYears}"
+                                            HeightRequest="150"
+                                            SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="x:Int32">
+                                        <Border Padding="8,5"
+                                                Margin="0,2"
+                                                StrokeShape="RoundRectangle 4"
+                                                BackgroundColor="{Binding ., Converter={StaticResource YearToColorConverter}}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=SetYearFilterCommand}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{Binding .}"
+                                                   FontSize="12"
+                                                   TextColor="{Binding ., Converter={StaticResource YearToTextColorConverter}}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <!-- More... button for older years -->
+                            <Border IsVisible="{Binding OlderYears.Count, Converter={StaticResource IntToBoolConverter}}"
+                                    Padding="8,5"
+                                    StrokeShape="RoundRectangle 4"
+                                    BackgroundColor="Transparent">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleOlderYearsCommand}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0"
+                                           Text="More..."
+                                           FontSize="12"
+                                           FontAttributes="Italic"
+                                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                                           VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding IsOlderYearsExpanded, Converter={StaticResource BoolToStringConverter}, ConverterParameter='▼|▶'}"
+                                           FontSize="10"
+                                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Older years list -->
+                            <Border IsVisible="{Binding IsOlderYearsExpanded}"
+                                    Padding="0"
+                                    StrokeShape="RoundRectangle 4"
+                                    BackgroundColor="Transparent">
+                                <CollectionView ItemsSource="{Binding OlderYears}"
+                                                HeightRequest="120"
+                                                SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="x:Int32">
+                                            <Border Padding="8,5"
+                                                    Margin="0,2"
+                                                    StrokeShape="RoundRectangle 4"
+                                                    BackgroundColor="{Binding ., Converter={StaticResource YearToColorConverter}}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=SetYearFilterCommand}"
+                                                                          CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{Binding .}"
+                                                       FontSize="12"
+                                                       TextColor="{Binding ., Converter={StaticResource YearToTextColorConverter}}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Status Bar -->
-            <Label Grid.Row="3"
+            <Label Grid.Row="4"
                    Text="{Binding StatusMessage}"
                    FontSize="11"
                    Padding="12,8"
@@ -129,35 +371,17 @@
                    MaxLines="2" />
         </Grid>
 
-        <!-- RIGHT: PHOTOS -->
+        <!-- CENTER: PHOTOS -->
         <Grid Grid.Column="1"
-              RowDefinitions="Auto,Auto,*">
+              RowDefinitions="Auto,*">
 
             <!-- Toolbar -->
             <Grid Grid.Row="0"
                   Padding="12,10"
                   BackgroundColor="{AppThemeBinding Light=White, Dark=#2a2a2a}"
-                  ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto"
+                  ColumnDefinitions="Auto,Auto,*,Auto"
                   ColumnSpacing="8">
                 <Button Grid.Column="0"
-                        Text="Upload"
-                        BackgroundColor="#27ae60"
-                        TextColor="White"
-                        FontSize="12"
-                        Padding="10,6"
-                        CornerRadius="6"
-                        Command="{Binding UploadPhotoCommand}"
-                        IsEnabled="{Binding HasAlbum}" />
-                <Button Grid.Column="1"
-                        Text="Download"
-                        BackgroundColor="#3498db"
-                        TextColor="White"
-                        FontSize="12"
-                        Padding="10,6"
-                        CornerRadius="6"
-                        Command="{Binding DownloadSelectedCommand}"
-                        IsEnabled="{Binding HasSelection}" />
-                <Button Grid.Column="2"
                         Text="Delete"
                         BackgroundColor="#e74c3c"
                         TextColor="White"
@@ -166,16 +390,16 @@
                         CornerRadius="6"
                         Command="{Binding DeleteSelectedCommand}"
                         IsEnabled="{Binding HasSelection}" />
-                <Button Grid.Column="3"
-                        Text="{Binding IsMultiSelectMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Done|Multi-Select'}"
-                        BackgroundColor="{Binding IsMultiSelectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#555'}"
+                <Button Grid.Column="1"
+                        Text="Slideshow"
+                        BackgroundColor="#8e44ad"
                         TextColor="White"
                         FontSize="12"
                         Padding="10,6"
                         CornerRadius="6"
-                        Command="{Binding ToggleMultiSelectCommand}"
+                        Command="{Binding OpenSlideshowCommand}"
                         IsEnabled="{Binding HasAlbum}" />
-                <Label Grid.Column="5"
+                <Label Grid.Column="3"
                        Text="{Binding SelectedAlbum.Name}"
                        FontSize="14"
                        FontAttributes="Bold"
@@ -184,7 +408,7 @@
                        HorizontalOptions="End" />
             </Grid>
 
-            <!-- Empty state / Loading -->
+            <!-- Loading -->
             <VerticalStackLayout Grid.Row="1"
                                  Padding="20"
                                  IsVisible="{Binding IsLoading}"
@@ -201,22 +425,30 @@
             </VerticalStackLayout>
 
             <!-- Photo Grid -->
-            <CollectionView Grid.Row="2"
+            <CollectionView x:Name="PhotoCollectionView"
+                            Grid.Row="1"
                             ItemsSource="{Binding Photos}"
-                            SelectionMode="{Binding IsMultiSelectMode, Converter={StaticResource MultiSelectConverter}}"
+                            SelectionMode="Multiple"
                             SelectedItems="{Binding SelectedPhotos}"
                             Margin="8">
+                <CollectionView.GestureRecognizers>
+                    <DropGestureRecognizer DragOver="OnDragOver"
+                                            Drop="OnDrop" />
+                </CollectionView.GestureRecognizers>
                 <CollectionView.EmptyView>
-                    <Label Text="No photos in this album. Upload some!"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light=#888, Dark=#999}"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"
-                           Margin="20" />
+                    <VerticalStackLayout VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         Spacing="12">
+                        <Label Text="Drop files here or use the upload panel"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#888, Dark=#999}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
-                                     Span="4"
+                                     Span="3"
                                      VerticalItemSpacing="8"
                                      HorizontalItemSpacing="8" />
                 </CollectionView.ItemsLayout>
@@ -248,5 +480,68 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
+
+        <!-- RIGHT: UPLOAD PANEL -->
+        <Grid Grid.Column="2"
+              RowDefinitions="Auto,*,Auto"
+              BackgroundColor="{AppThemeBinding Light=#f8f8f8, Dark=#1e1e1e}">
+
+            <!-- Upload Header -->
+            <Label Grid.Row="0"
+                   Text="Upload"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   Padding="12,12"
+                   TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
+
+            <!-- Drop Zone -->
+            <Border Grid.Row="1"
+                    Margin="10,0,10,10"
+                    Stroke="{AppThemeBinding Light=#bbb, Dark=#555}"
+                    StrokeThickness="1"
+                    StrokeDashArray="8,4"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="{AppThemeBinding Light=#fafafa, Dark=#2a2a2a}">
+                <Border.GestureRecognizers>
+                    <DropGestureRecognizer DragOver="OnDragOver"
+                                            Drop="OnDrop" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout VerticalOptions="Center"
+                                     HorizontalOptions="Center"
+                                     Spacing="6"
+                                     Padding="12">
+                    <Label Text="📁"
+                           FontSize="28"
+                           HorizontalOptions="Center" />
+                    <Label Text="Drop here"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
+                           HorizontalOptions="Center" />
+                    <Label Text="or"
+                           FontSize="11"
+                           TextColor="{AppThemeBinding Light=#999, Dark=#777}"
+                           HorizontalOptions="Center" />
+                    <Button Text="Browse"
+                            FontSize="11"
+                            Padding="14,6"
+                            BackgroundColor="#512BD4"
+                            TextColor="White"
+                            CornerRadius="6"
+                            HorizontalOptions="Center"
+                            Command="{Binding UploadPhotoCommand}"
+                            IsEnabled="{Binding HasAlbum}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Upload Status -->
+            <Label Grid.Row="2"
+                   Text="{Binding StatusMessage}"
+                   FontSize="11"
+                   Padding="12,8"
+                   TextColor="{AppThemeBinding Light=#666, Dark=#999}"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="2" />
+        </Grid>
     </Grid>
-</ContentPage>
+</ContentView>

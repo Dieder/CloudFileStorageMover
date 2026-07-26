@@ -20,6 +20,8 @@ public class DestinationSettingsService
 
     public string AzureConnectionString { get; private set; } = string.Empty;
 
+    public List<AzureAlbumEntry> AzureAlbums { get; private set; } = new();
+
     public event Action<string>? DestinationPathChanged;
 
     public event Action<string>? GooglePhotosDownloadPathChanged;
@@ -85,6 +87,36 @@ public class DestinationSettingsService
     {
         AzureConnectionString = connectionString?.Trim() ?? string.Empty;
         Save();
+    }
+
+    public void AddAzureAlbum(string displayName, string containerName)
+    {
+        if (!AzureAlbums.Any(a => a.ContainerName == containerName))
+        {
+            AzureAlbums.Add(new AzureAlbumEntry { DisplayName = displayName, ContainerName = containerName });
+            Save();
+        }
+    }
+
+    public void RemoveAzureAlbum(string containerName)
+    {
+        AzureAlbums.RemoveAll(a => a.ContainerName == containerName);
+        Save();
+    }
+
+    public void RenameAzureAlbum(string containerName, string newDisplayName)
+    {
+        var album = AzureAlbums.FirstOrDefault(a => a.ContainerName == containerName);
+        if (album != null)
+        {
+            album.DisplayName = newDisplayName;
+            Save();
+        }
+    }
+
+    public bool IsAzureAlbum(string containerName)
+    {
+        return AzureAlbums.Any(a => a.ContainerName == containerName);
     }
 
     public string GetTransferDestination(FileCategory category, DateTime? dateTaken = null)
@@ -208,6 +240,21 @@ public class DestinationSettingsService
 
             if (root.TryGetProperty("azureConnectionString", out var acs))
                 AzureConnectionString = acs.GetString() ?? string.Empty;
+
+            if (root.TryGetProperty("azureAlbums", out var albumsArr))
+            {
+                AzureAlbums.Clear();
+                foreach (var albumEl in albumsArr.EnumerateArray())
+                {
+                    var entry = new AzureAlbumEntry();
+                    if (albumEl.TryGetProperty("displayName", out var dn))
+                        entry.DisplayName = dn.GetString() ?? string.Empty;
+                    if (albumEl.TryGetProperty("containerName", out var cn))
+                        entry.ContainerName = cn.GetString() ?? string.Empty;
+                    if (!string.IsNullOrEmpty(entry.ContainerName))
+                        AzureAlbums.Add(entry);
+                }
+            }
         }
         catch
         {
@@ -235,7 +282,12 @@ public class DestinationSettingsService
                 ["documentsSubfolder"] = DocumentsSubfolder,
                 ["organizePhotosByDate"] = OrganizePhotosByDate,
                 ["megaKey"] = MegaKey,
-                ["azureConnectionString"] = AzureConnectionString
+                ["azureConnectionString"] = AzureConnectionString,
+                ["azureAlbums"] = AzureAlbums.Select(a => new Dictionary<string, string>
+                {
+                    ["displayName"] = a.DisplayName,
+                    ["containerName"] = a.ContainerName
+                }).ToList()
             };
             var json = System.Text.Json.JsonSerializer.Serialize(data,
                 new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
@@ -268,4 +320,10 @@ public class RemovableDrive
 
     public string FreeSpaceText => $"{FreeSpace / (1024.0 * 1024 * 1024):F1} GB free";
     public string TotalSizeText => $"{TotalSize / (1024.0 * 1024 * 1024):F1} GB";
+}
+
+public class AzureAlbumEntry
+{
+    public string DisplayName { get; set; } = string.Empty;
+    public string ContainerName { get; set; } = string.Empty;
 }

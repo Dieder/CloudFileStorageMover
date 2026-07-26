@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:CloudStorageMover.Core.Models"
+             x:Class="CloudStorageMover.App.Pages.SlideshowPage"
+             x:DataType="models:PhotoItem"
+             Title="{Binding Title}"
+             BackgroundColor="Black">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Grid Grid.Row="0"
+              Padding="16,12"
+              BackgroundColor="#22000000">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    Text="✕"
+                    FontSize="20"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    Command="{Binding CloseCommand}" />
+            <Label Grid.Column="1"
+                   x:Name="TitleLabel"
+                   Text=""
+                   FontSize="16"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center" />
+            <Label Grid.Column="2"
+                   x:Name="CounterLabel"
+                   Text=""
+                   FontSize="14"
+                   TextColor="#aaFFFFFF"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <!-- Carousel -->
+        <CarouselView Grid.Row="1"
+                      x:Name="SlideshowCarousel"
+                      ItemsSource="{Binding Photos}"
+                      Loop="False"
+                      BackgroundColor="Black">
+            <CarouselView.EmptyView>
+                <Label Text="No photos to display"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </CarouselView.EmptyView>
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="models:PhotoItem">
+                    <Grid BackgroundColor="Black">
+                        <Image Source="{Binding FullUrl}"
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <!-- Bottom Controls -->
+        <Grid Grid.Row="2"
+              Padding="16,12"
+              BackgroundColor="#22000000"
+              ColumnDefinitions="*,Auto,*,Auto,*">
+            <Button Grid.Column="0"
+                    Text="◀"
+                    FontSize="20"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    Command="{Binding PreviousCommand}" />
+            <Button Grid.Column="1"
+                    Text="⏵"
+                    FontSize="20"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="{Binding IsPlaying, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|White'}"
+                    Command="{Binding TogglePlayCommand}" />
+            <Button Grid.Column="2"
+                    Text="▶"
+                    FontSize="20"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    Command="{Binding NextCommand}" />
+            <Label Grid.Column="3"
+                   Text="{Binding CurrentIndex, StringFormat='{0} / {1}'}"
+                   FontSize="12"
+                   TextColor="#aaFFFFFF"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center" />
+        </Grid>
+    </Grid>
+</ContentPage>

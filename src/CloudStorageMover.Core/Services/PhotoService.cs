@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using CloudStorageMover.Core.Models;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +24,10 @@ public class PhotoService
 
         await foreach (var blob in container.GetBlobsAsync())
         {
-            if (blob.Name.EndsWith("/")) continue; // skip virtual directories
+            if (blob.Name.EndsWith("/")) continue;
+
+            var blobClient = container.GetBlobClient(blob.Name);
+            var sasUrl = GenerateSasUrl(blobClient, albumName);
 
             photos.Add(new PhotoItem
             {
@@ -32,12 +36,37 @@ public class PhotoService
                 ContentType = blob.Properties?.ContentType ?? "unknown",
                 Size = blob.Properties?.ContentLength ?? 0,
                 LastModified = blob.Properties?.LastModified,
-                ThumbnailUrl = container.GetBlobClient(blob.Name).Uri.ToString(),
-                FullUrl = container.GetBlobClient(blob.Name).Uri.ToString()
+                ThumbnailUrl = sasUrl,
+                FullUrl = sasUrl
             });
         }
 
         return photos.OrderBy(p => p.BlobName).ToList();
+    }
+
+    public string GetPhotoUrl(string albumName, string blobName)
+    {
+        var client = _blobService.GetClient();
+        var container = client.GetBlobContainerClient(albumName);
+        var blobClient = container.GetBlobClient(blobName);
+        return GenerateSasUrl(blobClient, albumName);
+    }
+
+    private string GenerateSasUrl(BlobClient blobClient, string containerName)
+    {
+        if (!blobClient.CanGenerateSasUri)
+            return blobClient.Uri.ToString();
+
+        var sasBuilder = new BlobSasBuilder
+        {
+            BlobContainerName = containerName,
+            BlobName = blobClient.Name,
+            Resource = "b",
+            ExpiresOn = DateTimeOffset.UtcNow.AddHours(24)
+        };
+        sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+        return blobClient.GenerateSasUri(sasBuilder).ToString();
     }
 
     public async Task UploadPhotoAsync(string albumName, Stream stream, string fileName, string contentType = "image/jpeg")

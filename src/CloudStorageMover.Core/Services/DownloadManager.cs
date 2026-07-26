@@ -25,7 +25,8 @@ public class DownloadManager
                 Directory.CreateDirectory(directory);
 
             using var stream = await job.Provider.OpenReadStreamAsync(job.RemotePath, job.Cts.Token);
-            job.TotalBytes = stream.CanSeek ? stream.Length : 0;
+            if (job.TotalBytes == 0 && stream.CanSeek)
+                job.TotalBytes = stream.Length;
 
             using var fileStream = new FileStream(job.LocalPath, FileMode.Create, FileAccess.Write);
             var buffer = new byte[81920];

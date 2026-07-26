@@ -25,6 +25,9 @@ public partial class MainPageViewModel : ObservableObject
     private bool _isCameraImportPageVisible;
 
     [ObservableProperty]
+    private bool _isAzurePhotosPageVisible;
+
+    [ObservableProperty]
     private string _currentProviderName = string.Empty;
 
     [ObservableProperty]
@@ -47,6 +50,7 @@ public partial class MainPageViewModel : ObservableObject
         IsConfigPageVisible = item == AppMenuItem.Configuration;
         IsGalleryPageVisible = false;
         IsCameraImportPageVisible = false;
+        IsAzurePhotosPageVisible = false;
     }
 
     public void ShowGallery()
@@ -65,6 +69,17 @@ public partial class MainPageViewModel : ObservableObject
         IsConfigPageVisible = false;
         IsGalleryPageVisible = false;
         IsCameraImportPageVisible = true;
+        IsAzurePhotosPageVisible = false;
+    }
+
+    public void ShowAzurePhotos()
+    {
+        IsSourcePageVisible = false;
+        IsTransferPageVisible = false;
+        IsConfigPageVisible = false;
+        IsGalleryPageVisible = false;
+        IsCameraImportPageVisible = false;
+        IsAzurePhotosPageVisible = true;
     }
 
     public void HideGallery()
@@ -75,6 +90,11 @@ public partial class MainPageViewModel : ObservableObject
     public void HideCameraImport()
     {
         IsCameraImportPageVisible = false;
+    }
+
+    public void HideAzurePhotos()
+    {
+        IsAzurePhotosPageVisible = false;
     }
 
     public void SetFolders(List<FileItem> folders, string providerName)

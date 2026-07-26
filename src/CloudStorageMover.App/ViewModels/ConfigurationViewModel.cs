@@ -24,6 +24,18 @@ public partial class ConfigurationViewModel : ObservableObject
     [ObservableProperty]
     private bool _isGooglePhotosDownloadValid;
 
+    [ObservableProperty]
+    private string _azureConnectionString = string.Empty;
+
+    [ObservableProperty]
+    private bool _isAzureConnectionStringVisible;
+
+    [ObservableProperty]
+    private string _megaKey = string.Empty;
+
+    [ObservableProperty]
+    private bool _isMegaKeyVisible;
+
     public ConfigurationViewModel(DestinationSettingsService destinationService,
                                    IFolderPickerService folderPicker,
                                    ILogger<ConfigurationViewModel> logger)
@@ -35,6 +47,8 @@ public partial class ConfigurationViewModel : ObservableObject
         _isDestinationValid = _destinationService.HasValidDestination();
         _googlePhotosDownloadPath = _destinationService.GooglePhotosDownloadPath;
         _isGooglePhotosDownloadValid = _destinationService.HasValidGooglePhotosDestination();
+        _azureConnectionString = _destinationService.AzureConnectionString;
+        _megaKey = _destinationService.MegaKey;
     }
 
     partial void OnDestinationPathChanged(string value)
@@ -47,6 +61,28 @@ public partial class ConfigurationViewModel : ObservableObject
     {
         _destinationService.SetGooglePhotosDownloadPath(value);
         IsGooglePhotosDownloadValid = _destinationService.HasValidGooglePhotosDestination();
+    }
+
+    partial void OnAzureConnectionStringChanged(string value)
+    {
+        _destinationService.SetAzureConnectionString(value);
+    }
+
+    partial void OnMegaKeyChanged(string value)
+    {
+        _destinationService.SetMegaKey(value);
+    }
+
+    [RelayCommand]
+    private void ToggleAzureConnectionStringVisibility()
+    {
+        IsAzureConnectionStringVisible = !IsAzureConnectionStringVisible;
+    }
+
+    [RelayCommand]
+    private void ToggleMegaKeyVisibility()
+    {
+        IsMegaKeyVisible = !IsMegaKeyVisible;
     }
 
     [RelayCommand]
