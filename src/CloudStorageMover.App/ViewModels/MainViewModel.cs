@@ -78,7 +78,7 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<AlbumModel> Albums { get; } = new();
     public ObservableCollection<CorePhotoItem> Photos { get; } = new();
-    public ObservableCollection<CorePhotoItem> SelectedPhotos { get; } = new();
+    public ObservableCollection<object> SelectedPhotos { get; } = new();
     public ObservableCollection<string> AvailableContainers { get; } = new();
     public ObservableCollection<int> RecentYears { get; } = new();
     public ObservableCollection<int> OlderYears { get; } = new();
@@ -513,8 +513,9 @@ public partial class MainViewModel : ObservableObject
 
             IsLoading = true;
             var count = 0;
-            foreach (var photo in SelectedPhotos.ToList())
+            foreach (var item in SelectedPhotos.ToList())
             {
+                if (item is not CorePhotoItem photo) continue;
                 using var stream = await _photoService.DownloadPhotoAsync(photo.AlbumName, photo.BlobName);
                 var filePath = Path.Combine(folder, photo.BlobName);
                 using var fileStream = File.Create(filePath);
@@ -548,8 +549,12 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var names = SelectedPhotos.Select(p => p.BlobName).ToList();
+            var names = SelectedPhotos
+                .OfType<CorePhotoItem>()
+                .Select(p => p.BlobName)
+                .ToList();
             await _photoService.DeletePhotosAsync(SelectedAlbum.Uri, names);
+            SelectedPhotos.Clear();
             await LoadPhotosAsync(SelectedAlbum.Uri);
             await LoadAlbumsAsync();
             StatusMessage = $"Deleted {names.Count} file(s)";
