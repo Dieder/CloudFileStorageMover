@@ -6,5 +6,6 @@ public enum StorageProviderType
     GoogleDrive,
     Mega,
     PCloud,
-    GooglePhotos
+    GooglePhotos,
+    AzureBlob
 }

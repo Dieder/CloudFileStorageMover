@@ -51,6 +51,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.MegaStorageProvider>();
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.PCloudStorageProvider>();
         builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.GooglePhotosStorageProvider>();
+        builder.Services.AddSingleton<IStorageProviderService, CloudStorageMover.Core.Services.AzureBlobStorageProvider>();
         builder.Services.AddSingleton<StorageProviderFactory>();
 
         // Auth services
