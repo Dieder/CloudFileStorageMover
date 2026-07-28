@@ -17,28 +17,7 @@
               BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#222}">
 
             <!-- Connection Status -->
-            <Border Grid.Row="0"
-                    Padding="12,10"
-                    BackgroundColor="{AppThemeBinding Light=#e8e8e8, Dark=#2a2a2a}">
-                <Grid ColumnDefinitions="*,Auto"
-                      ColumnSpacing="8">
-                    <Label Grid.Column="0"
-                           Text="{Binding ConnectionStatus}"
-                           FontSize="12"
-                           TextColor="{AppThemeBinding Light=#555, Dark=#aaa}"
-                           VerticalOptions="Center" />
-                    <Button Grid.Column="1"
-                            Text="&#x21bb;"
-                            FontSize="14"
-                            WidthRequest="28"
-                            HeightRequest="28"
-                            Padding="0"
-                            BackgroundColor="Transparent"
-                            TextColor="{AppThemeBinding Light=#512BD4, Dark=#9b8bff}"
-                            Command="{Binding ConnectCommand}" />
-                </Grid>
-            </Border>
-
+           
             <!-- Albums Header -->
             <Grid Grid.Row="1"
                   Padding="12,10"
@@ -217,9 +196,10 @@
                            TextColor="{AppThemeBinding Light=#333, Dark=#eee}" />
 
                     <!-- Media Type Filters -->
-                    <Grid ColumnDefinitions="*,*"
-                          ColumnSpacing="6">
-                        <Border Grid.Column="0"
+                    <Grid ColumnDefinitions="auto"
+                          RowDefinitions="auto, auto"
+                          RowSpacing="6">
+                        <Border Grid.Column="0" Grid.Row="0"
                                 Padding="8,6"
                                 StrokeShape="RoundRectangle 4"
                                 BackgroundColor="{Binding IsFilterPhoto, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#e0e0e0'}">
@@ -229,9 +209,9 @@
                             <Label Text="📷 Photo"
                                    FontSize="12"
                                    HorizontalOptions="Center"
-                                   TextColor="{Binding IsFilterPhoto, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#333'}" />
+                                   TextColor="{Binding IsFilterPhoto, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#333'}" />
                         </Border>
-                        <Border Grid.Column="1"
+                        <Border Grid.Column="0" Grid.Row="1"
                                 Padding="8,6"
                                 StrokeShape="RoundRectangle 4"
                                 BackgroundColor="{Binding IsFilterVideo, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4|#e0e0e0'}">
@@ -241,7 +221,7 @@
                             <Label Text="🎬 Video"
                                    FontSize="12"
                                    HorizontalOptions="Center"
-                                   TextColor="{Binding IsFilterVideo, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#333'}" />
+                                   TextColor="{Binding IsFilterVideo, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#333'}" />
                         </Border>
                     </Grid>
 
